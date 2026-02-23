@@ -1,0 +1,12 @@
+cd "E:\Project-Face-attandence-system-version-1.0 (1)\Project-Face-attandence-system-version-1.0"
+
+
+
+python -m venv venv
+venv\Scripts\activate
+
+
+python manage.py migrate
+
+
+python manage.py runserver

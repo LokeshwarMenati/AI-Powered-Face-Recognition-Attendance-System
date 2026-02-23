@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition - Mark Attendance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            background: white;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            background: #000;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+            display: none;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        .controls {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            margin: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
+
+        .status-message {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .face-overlay {
+            position: absolute;
+            border: 3px solid;
+            border-radius: 5px;
+            pointer-events: none;
+        }
+
+        .face-recognized {
+            border-color: #28a745;
+        }
+
+        .face-unknown {
+            border-color: #ffc107;
+        }
+
+        .face-label {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: bold;
+            top: -30px;
+            left: 0;
+        }
+
+        .info-panel {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        .info-panel h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+
+        .back-button {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .back-button a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            display: inline-block;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+
+        .back-button a:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1><i class="fas fa-camera"></i> Face Recognition - Mark Attendance</h1>
+            </div>
+            <div class="card-body">
+                <div class="video-container" id="videoContainer">
+                    <video id="video" autoplay playsinline muted></video>
+                    <canvas id="canvas"></canvas>
+                    <div id="cameraPlaceholder" style="display: flex; align-items: center; justify-content: center; height: 400px; background: #000; color: #fff; font-size: 1.2rem;">
+                        <div style="text-align: center;">
+                            <i class="fas fa-camera" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.5;"></i>
+                            <p>Click "Start Recognition" to begin</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Processing...</span>
+                    </div>
+                </div>
+
+                <div class="status-message" id="statusMessage"></div>
+
+                <div class="controls">
+                    <button class="btn btn-primary" id="startBtn">
+                        <i class="fas fa-play"></i> Start Recognition
+                    </button>
+                    <button class="btn btn-danger" id="stopBtn" disabled>
+                        <i class="fas fa-stop"></i> Stop Recognition
+                    </button>
+                </div>
+
+                <div class="info-panel">
+                    <h3><i class="fas fa-info-circle"></i> Instructions</h3>
+                    <div class="info-item">
+                        <strong>1.</strong> Click "Start Recognition" to begin face detection
+                    </div>
+                    <div class="info-item">
+                        <strong>2.</strong> Position your face in front of the camera
+                    </div>
+                    <div class="info-item">
+                        <strong>3.</strong> The system will automatically recognize your face and mark attendance
+                    </div>
+                    <div class="info-item">
+                        <strong>4.</strong> Click "Stop Recognition" when finished
+                    </div>
+                    {% if threshold %}
+                    <div class="info-item">
+                        <strong>Recognition Threshold:</strong> {{ threshold }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="back-button">
+                    <a href="{% url 'home' %}">
+                        <i class="fas fa-home"></i> Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const loading = document.getElementById('loading');
+        const videoContainer = document.getElementById('videoContainer');
+
+        let stream = null;
+        let recognitionInterval = null;
+        let faceOverlays = [];
+
+        // Function to show status message
+        function showStatus(message, type = 'info') {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message status-${type}`;
+            statusMessage.style.display = 'block';
+            setTimeout(() => {
+                statusMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        // Check if HTTPS is required (getUserMedia requires HTTPS except on localhost)
+        window.addEventListener('DOMContentLoaded', () => {
+            const isSecure = window.location.protocol === 'https:' || 
+                           window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1';
+            
+            if (!isSecure) {
+                showStatus('Note: Camera access works best over HTTPS or localhost. If you have issues, try accessing via HTTPS.', 'info');
+            }
+        });
+
+        // Function to clear face overlays
+        function clearFaceOverlays() {
+            faceOverlays.forEach(overlay => overlay.remove());
+            faceOverlays = [];
+        }
+
+        // Function to draw face boxes
+        function drawFaceBoxes(faces) {
+            clearFaceOverlays();
+            
+            if (!faces || faces.length === 0) return;
+
+            const videoRect = video.getBoundingClientRect();
+            const videoWidth = video.videoWidth;
+            const videoHeight = video.videoHeight;
+            const displayWidth = videoRect.width;
+            const displayHeight = videoRect.height;
+
+            faces.forEach(face => {
+                if (!face.box) return;
+
+                const [x1, y1, x2, y2] = face.box;
+                
+                // Scale coordinates to display size
+                const scaleX = displayWidth / videoWidth;
+                const scaleY = displayHeight / videoHeight;
+
+                const overlay = document.createElement('div');
+                overlay.className = `face-overlay ${face.recognized ? 'face-recognized' : 'face-unknown'}`;
+                overlay.style.left = `${x1 * scaleX}px`;
+                overlay.style.top = `${y1 * scaleY}px`;
+                overlay.style.width = `${(x2 - x1) * scaleX}px`;
+                overlay.style.height = `${(y2 - y1) * scaleY}px`;
+
+                const label = document.createElement('div');
+                label.className = 'face-label';
+                label.textContent = face.name;
+                overlay.appendChild(label);
+
+                videoContainer.appendChild(overlay);
+                faceOverlays.push(overlay);
+            });
+        }
+
+        // Function to start webcam
+        async function startWebcam() {
+            try {
+                // Check if browser supports getUserMedia
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    // Fallback for older browsers
+                    navigator.mediaDevices = navigator.mediaDevices || {};
+                    navigator.mediaDevices.getUserMedia = navigator.mediaDevices.getUserMedia ||
+                        navigator.webkitGetUserMedia ||
+                        navigator.mozGetUserMedia ||
+                        navigator.msGetUserMedia;
+                    
+                    if (!navigator.mediaDevices.getUserMedia) {
+                        showStatus('Your browser does not support camera access. Please use a modern browser like Chrome, Firefox, or Edge.', 'error');
+                        return false;
+                    }
+                }
+
+                // Request camera access
+                const constraints = {
+                    video: {
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 },
+                        facingMode: 'user'
+                    }
+                };
+
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+                
+                // Hide placeholder and show video
+                const placeholder = document.getElementById('cameraPlaceholder');
+                if (placeholder) {
+                    placeholder.style.display = 'none';
+                }
+                video.style.display = 'block';
+                
+                // Wait for video to be ready
+                video.onloadedmetadata = () => {
+                    video.play().then(() => {
+                        showStatus('Camera started successfully!', 'success');
+                    }).catch(err => {
+                        console.error('Error playing video:', err);
+                        showStatus('Error playing video stream.', 'error');
+                    });
+                };
+
+                // Handle video errors
+                video.onerror = (err) => {
+                    console.error('Video error:', err);
+                    showStatus('Error with video stream.', 'error');
+                };
+
+                return true;
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                let errorMessage = 'Error accessing camera. ';
+                
+                if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                    errorMessage += 'Please allow camera permissions in your browser settings.';
+                } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+                    errorMessage += 'No camera found. Please connect a camera and try again.';
+                } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+                    errorMessage += 'Camera is being used by another application. Please close other apps using the camera.';
+                } else if (err.name === 'OverconstrainedError' || err.name === 'ConstraintNotSatisfiedError') {
+                    errorMessage += 'Camera does not support the requested settings. Trying with default settings...';
+                    // Try with simpler constraints
+                    try {
+                        stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                        video.srcObject = stream;
+                        
+                        // Hide placeholder and show video
+                        const placeholder = document.getElementById('cameraPlaceholder');
+                        if (placeholder) {
+                            placeholder.style.display = 'none';
+                        }
+                        video.style.display = 'block';
+                        
+                        video.play();
+                        showStatus('Camera started with default settings!', 'success');
+                        return true;
+                    } catch (retryErr) {
+                        errorMessage = 'Could not access camera with any settings.';
+                    }
+                } else {
+                    errorMessage += err.message || 'Unknown error occurred.';
+                }
+                
+                showStatus(errorMessage, 'error');
+                return false;
+            }
+        }
+
+        // Function to stop webcam
+        function stopWebcam() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            video.srcObject = null;
+            video.style.display = 'none';
+            clearFaceOverlays();
+            
+            // Show placeholder again
+            const placeholder = document.getElementById('cameraPlaceholder');
+            if (placeholder) {
+                placeholder.style.display = 'flex';
+            }
+        }
+
+        // Function to capture frame and send for recognition
+        async function recognizeFace() {
+            // Check if video is ready and has valid dimensions
+            if (!video || !stream || video.readyState !== video.HAVE_ENOUGH_DATA) {
+                return;
+            }
+
+            // Check if video has valid dimensions
+            if (!video.videoWidth || !video.videoHeight) {
+                return;
+            }
+
+            // Set canvas dimensions to match video
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Draw current video frame to canvas
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // Convert canvas to base64
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+
+            // Send to server for recognition
+            try {
+                const csrftoken = getCookie('csrftoken');
+                const formData = new FormData();
+                formData.append('image_data', imageData);
+
+                const response = await fetch('{% url "recognize_face_api" %}', {
+                    method: 'POST',
+                    body: formData,
+                    headers: csrftoken ? {
+                        'X-CSRFToken': csrftoken
+                    } : {}
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    showStatus(data.error, 'error');
+                    return;
+                }
+
+                // Draw face boxes
+                if (data.faces && data.faces.length > 0) {
+                    drawFaceBoxes(data.faces);
+                } else {
+                    clearFaceOverlays();
+                }
+
+                // Show attendance messages
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(msg => {
+                        showStatus(msg, 'success');
+                    });
+                }
+
+            } catch (error) {
+                console.error('Recognition error:', error);
+                showStatus('Error during face recognition', 'error');
+            }
+        }
+
+        // Function to get CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Event listeners
+        startBtn.addEventListener('click', async () => {
+            const success = await startWebcam();
+            if (success) {
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                
+                // Wait a bit for video to be ready before starting recognition
+                setTimeout(() => {
+                    // Start recognition loop (every 1 second)
+                    recognitionInterval = setInterval(recognizeFace, 1000);
+                    showStatus('Face recognition started!', 'info');
+                }, 500);
+            }
+        });
+
+        stopBtn.addEventListener('click', () => {
+            stopWebcam();
+            if (recognitionInterval) {
+                clearInterval(recognitionInterval);
+                recognitionInterval = null;
+            }
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            showStatus('Face recognition stopped.', 'info');
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            stopWebcam();
+            if (recognitionInterval) {
+                clearInterval(recognitionInterval);
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
