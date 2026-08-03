@@ -32,50 +32,85 @@ from PIL import Image
 import io
 
 
-# Initialize MTCNN and InceptionResnetV1
-mtcnn = MTCNN(keep_all=True)
-resnet = InceptionResnetV1(pretrained='vggface2').eval()
+# Try importing torch/facenet-pytorch if available, otherwise use lightweight OpenCV YuNet + SFace
+try:
+    import torch
+    from facenet_pytorch import InceptionResnetV1, MTCNN
+    USE_TORCH = True
+    mtcnn = MTCNN(keep_all=True)
+    resnet = InceptionResnetV1(pretrained='vggface2').eval()
+except Exception:
+    USE_TORCH = False
 
-# Function to detect and encode faces
+YUNET_PATH = os.path.join(settings.BASE_DIR, 'models', 'face_detection_yunet_2023mar.onnx')
+SFACE_PATH = os.path.join(settings.BASE_DIR, 'models', 'face_recognition_sface_2021dec.onnx')
+
+detector = None
+recognizer = None
+if os.path.exists(YUNET_PATH) and os.path.exists(SFACE_PATH):
+    detector = cv2.FaceDetectorYN.create(YUNET_PATH, '', (300, 300))
+    recognizer = cv2.FaceRecognizerSF.create(SFACE_PATH, '')
+
 def detect_and_encode(image):
-    with torch.no_grad():
-        boxes, _ = mtcnn.detect(image)
-        if boxes is not None:
-            faces = []
-            for box in boxes:
-                face = image[int(box[1]):int(box[3]), int(box[0]):int(box[2])]
-                if face.size == 0:
-                    continue
-                face = cv2.resize(face, (160, 160))
-                face = np.transpose(face, (2, 0, 1)).astype(np.float32) / 255.0
-                face_tensor = torch.tensor(face).unsqueeze(0)
-                encoding = resnet(face_tensor).detach().numpy().flatten()
-                faces.append(encoding)
-            return faces
-    return []
+    if not USE_TORCH and detector is not None and recognizer is not None:
+        h, w, _ = image.shape
+        detector.setInputSize((w, h))
+        image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) if image.ndim == 3 else image
+        _, faces = detector.detect(image_bgr)
+        encodings = []
+        boxes = []
+        if faces is not None:
+            for face in faces:
+                aligned_face = recognizer.alignCrop(image_bgr, face)
+                feature = recognizer.feature(aligned_face).flatten()
+                encodings.append(feature)
+                box = [float(face[0]), float(face[1]), float(face[0] + face[2]), float(face[1] + face[3])]
+                boxes.append(box)
+        return encodings, boxes
 
-# Function to encode uploaded images
+    if USE_TORCH:
+        with torch.no_grad():
+            boxes, _ = mtcnn.detect(image)
+            faces = []
+            ret_boxes = []
+            if boxes is not None:
+                for box in boxes:
+                    face = image[int(box[1]):int(box[3]), int(box[0]):int(box[2])]
+                    if face.size == 0:
+                        continue
+                    face = cv2.resize(face, (160, 160))
+                    face = np.transpose(face, (2, 0, 1)).astype(np.float32) / 255.0
+                    face_tensor = torch.tensor(face).unsqueeze(0)
+                    encoding = resnet(face_tensor).detach().numpy().flatten()
+                    faces.append(encoding)
+                    ret_boxes.append(box.tolist())
+                return faces, ret_boxes
+    return [], []
+
 def encode_uploaded_images():
     known_face_encodings = []
     known_face_names = []
-
-    # Fetch only authorized images
     uploaded_images = Student.objects.filter(authorized=True)
 
     for student in uploaded_images:
         image_path = os.path.join(settings.MEDIA_ROOT, str(student.image))
+        if not os.path.exists(image_path):
+            continue
         known_image = cv2.imread(image_path)
+        if known_image is None:
+            continue
         known_image_rgb = cv2.cvtColor(known_image, cv2.COLOR_BGR2RGB)
-        encodings = detect_and_encode(known_image_rgb)
+        encodings, _ = detect_and_encode(known_image_rgb)
         if encodings:
             known_face_encodings.extend(encodings)
             known_face_names.append(student.name)
 
     return known_face_encodings, known_face_names
 
-# Function to recognize faces
 def recognize_faces(known_encodings, known_names, test_encodings, threshold=0.6):
     recognized_names = []
+    if len(known_encodings) == 0:
+        return ['Not Recognized'] * len(test_encodings)
     for test_encoding in test_encodings:
         distances = np.linalg.norm(known_encodings - test_encoding, axis=1)
         min_distance_idx = np.argmin(distances)
@@ -145,7 +180,7 @@ def recognize_face_api(request):
                 threshold = cam_configs.first().threshold
             
             # Detect and encode faces in the frame
-            test_face_encodings = detect_and_encode(frame_rgb)
+            test_face_encodings, boxes = detect_and_encode(frame_rgb)
             
             if not test_face_encodings:
                 return JsonResponse({
@@ -168,7 +203,6 @@ def recognize_face_api(request):
             names = recognize_faces(np.array(known_face_encodings), known_face_names, test_face_encodings, threshold)
             
             # Get face boxes for drawing
-            boxes, _ = mtcnn.detect(frame_rgb)
             faces_data = []
             recognized_any = False
             attendance_messages = []

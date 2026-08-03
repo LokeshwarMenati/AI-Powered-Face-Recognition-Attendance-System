@@ -1,7 +1,4 @@
---extra-index-url https://download.pytorch.org/whl/cpu
 Django>=5.0.0
 numpy
 opencv-python-headless
 Pillow
-torch==2.2.2+cpu
-facenet-pytorch
