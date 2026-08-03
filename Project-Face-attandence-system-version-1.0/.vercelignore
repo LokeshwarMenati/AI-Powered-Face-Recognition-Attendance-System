@@ -1,0 +1,9 @@
+.venv
+.venv/
+venv
+venv/
+*.zip
+.git
+.qodo
+*.pyc
+__pycache__/

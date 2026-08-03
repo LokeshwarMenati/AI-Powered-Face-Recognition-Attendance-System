@@ -3,7 +3,10 @@
   "builds": [
     {
       "src": "Project-Face-attandence-system-version-1.0/Project101/wsgi.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "excludeFiles": "{.venv/**,venv/**,*.zip}"
+      }
     }
   ],
   "routes": [

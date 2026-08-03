@@ -1,0 +1,10 @@
+.venv
+.venv/
+venv
+venv/
+Project-Face-attandence-system-version-1.0.zip
+*.zip
+.git
+.qodo
+*.pyc
+__pycache__/
