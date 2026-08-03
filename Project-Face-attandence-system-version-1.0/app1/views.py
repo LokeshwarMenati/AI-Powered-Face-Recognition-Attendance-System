@@ -412,7 +412,6 @@ def camera_config_update(request, pk):
         config.name = request.POST.get('name')
         config.camera_source = request.POST.get('camera_source')
         config.threshold = request.POST.get('threshold')
-        config.success_sound_path = request.POST.get('success_sound_path')
 
         # Save the changes to the database
         config.save()  

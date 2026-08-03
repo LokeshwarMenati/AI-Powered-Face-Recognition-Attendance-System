@@ -40,3 +40,7 @@ media/
 # OS
 .DS_Store
 Thumbs.db
+
+# Vercel & Tooling
+.vercel/
+.qodo/
