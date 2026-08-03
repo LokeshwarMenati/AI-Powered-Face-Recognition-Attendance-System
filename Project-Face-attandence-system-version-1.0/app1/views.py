@@ -9,7 +9,10 @@ from .models import Student, Attendance, CameraConfiguration
 from django.core.files.base import ContentFile
 from datetime import datetime, timedelta
 from django.utils import timezone
-import pygame  # Import pygame for playing sounds
+try:
+    import pygame  # Import pygame for playing sounds
+except ImportError:
+    pygame = None
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.urls import reverse_lazy

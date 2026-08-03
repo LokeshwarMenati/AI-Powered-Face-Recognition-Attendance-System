@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "Project-Face-attandence-system-version-1.0/Project101/wsgi.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "Project-Face-attandence-system-version-1.0/Project101/wsgi.py"
+    }
+  ]
+}
