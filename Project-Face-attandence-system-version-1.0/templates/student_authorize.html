@@ -3,103 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Authorize Student</title>
-    <!-- Include any necessary CSS or external libraries -->
+    <title>Authorize Student | AI Attendance System</title>
+    <!-- Modern Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Global Styles */
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background-color: #f9f9f9;
+        :root {
+            --bg-deep: #060913;
+            --bg-card: rgba(13, 19, 36, 0.85);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --cyan-glow: #00f2fe;
+            --blue-accent: #4facfe;
+            --purple-accent: #7928ca;
+            --emerald-glow: #10b981;
+            --rose-glow: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.28;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .glow-1 {
+            top: -100px;
+            right: 15%;
+            width: 550px;
+            height: 550px;
+            background: radial-gradient(circle, #00f2fe, #4facfe, transparent 75%);
+        }
+        .glow-2 {
+            bottom: -150px;
+            left: 10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #7928ca, #3b82f6, transparent 75%);
+        }
+
         .container {
-            max-width: 800px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: box-shadow 0.3s ease;
+            max-width: 680px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
         }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .student-details {
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-            margin-bottom: 30px;
-        }
-        .detail {
-            margin-bottom: 10px;
-            color: #555;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        label {
-            font-weight: bold;
-            color: #777;
-        }
-        input[type="checkbox"] {
-            margin-right: 10px;
-        }
-        button[type="submit"] {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            cursor: pointer;
-            border-radius: 5px;
-            transition: background-color 0.3s ease;
-        }
-        button[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-        .actions {
-            margin-top: 20px;
-            text-align: center;
-        }
-        .actions a {
-            display: inline-block;
-            margin: 0 10px;
-            padding: 10px 20px;
-            color: #007bff;
+
+        .btn-back-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
             text-decoration: none;
-            border: 1px solid #007bff;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 0.88rem;
+            padding: 8px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 30px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
         }
-        .actions a:hover {
-            background-color: #007bff;
-            color: #fff;
+
+        .btn-back-nav:hover {
+            color: var(--cyan-glow);
+            border-color: rgba(0, 242, 254, 0.3);
+            transform: translateX(-3px);
+        }
+
+        .auth-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 36px 32px;
+            box-shadow: 
+                0 0 0 1px rgba(0, 242, 254, 0.1),
+                0 25px 60px -10px rgba(0, 0, 0, 0.8);
+            animation: cardEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header-custom {
+            text-align: center;
+            margin-bottom: 26px;
+        }
+
+        .card-header-custom h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .card-header-custom p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .profile-hero {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 16px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 16px;
+            object-fit: cover;
+            border: 2px solid var(--cyan-glow);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+        }
+
+        .profile-info h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .profile-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 2px 0;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .detail-item {
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+        }
+
+        .detail-item .label {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .detail-item .value {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .toggle-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: rgba(0, 242, 254, 0.05);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            border-radius: 14px;
+            margin-bottom: 24px;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #ffffff;
+            cursor: pointer;
+        }
+
+        .toggle-checkbox {
+            width: 22px;
+            height: 22px;
+            accent-color: var(--cyan-glow);
+            cursor: pointer;
+        }
+
+        .btn-update {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            border: none;
+            border-radius: 14px;
+            color: #060913;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(0, 242, 254, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .btn-update:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px -5px rgba(0, 242, 254, 0.6);
+        }
+
+        .action-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        .action-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.2s;
+        }
+
+        .action-links a:hover {
+            color: var(--cyan-glow);
         }
     </style>
 </head>
 <body>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
     <div class="container">
-        <h1>Authorize Student</h1>
-        <div class="student-details">
-            <div class="detail"><strong>Name:</strong> {{ student.name }}</div>
-            <div class="detail"><strong>Email:</strong> {{ student.email }}</div>
-            <div class="detail"><strong>Phone Number:</strong> {{ student.phone_number }}</div>
-            <div class="detail"><strong>Class:</strong> {{ student.student_class }}</div>
-            <div class="detail"><strong>Authorized:</strong> {% if student.authorized %} Yes {% else %} No {% endif %}</div>
-        </div>
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                <input type="checkbox" id="authorized" name="authorized" {% if student.authorized %} checked {% endif %}>
-                <label for="authorized">Authorize Student</label>
+        <a href="{% url 'student-list' %}" class="btn-back-nav">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to Student Roster</span>
+        </a>
+
+        <div class="auth-card">
+            <div class="card-header-custom">
+                <h2>Biometric Authorization</h2>
+                <p>Grant or revoke facial attendance tracking permission for this student</p>
             </div>
-            <button type="submit">Update Authorization</button>
-        </form>
-        <div class="actions">
-            <a href="{% url 'student-list' %}">Back to List</a>
-            <a href="{% url 'student-detail' pk=student.pk %}">View Details</a>
+
+            <div class="profile-hero">
+                {% if student.image %}
+                    <img src="{{ student.image.url }}" alt="{{ student.name }}" class="profile-pic">
+                {% else %}
+                    <div class="profile-pic" style="display: flex; align-items: center; justify-content: center; background: #1e293b;">
+                        <i class="fas fa-user" style="font-size: 2rem; color: #64748b;"></i>
+                    </div>
+                {% endif %}
+                <div class="profile-info">
+                    <h3>{{ student.name }}</h3>
+                    <p>{{ student.email }}</p>
+                    <p>Class: {{ student.student_class }}</p>
+                </div>
+            </div>
+
+            <div class="details-grid">
+                <div class="detail-item">
+                    <div class="label">Phone Number</div>
+                    <div class="value">{{ student.phone_number }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="label">Current Status</div>
+                    <div class="value" style="color: {% if student.authorized %}var(--emerald-glow){% else %}var(--rose-glow){% endif %};">
+                        {% if student.authorized %}● Authorized{% else %}○ Unauthorized{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="toggle-box">
+                    <label class="toggle-label" for="authorized">
+                        <i class="fas fa-user-shield" style="color: var(--cyan-glow);"></i>
+                        <span>Authorize for Face Recognition Attendance</span>
+                    </label>
+                    <input type="checkbox" id="authorized" name="authorized" class="toggle-checkbox" {% if student.authorized %}checked{% endif %}>
+                </div>
+
+                <button type="submit" class="btn-update">
+                    <i class="fas fa-save me-2"></i> Save Authorization Settings
+                </button>
+            </form>
+
+            <div class="action-links">
+                <a href="{% url 'student-detail' pk=student.pk %}"><i class="fas fa-id-card"></i> View Full Profile</a>
+                <span>•</span>
+                <a href="{% url 'student-delete' pk=student.pk %}" style="color: #f87171;"><i class="fas fa-trash"></i> Delete Student</a>
+            </div>
         </div>
     </div>
 </body>

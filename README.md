@@ -1,4 +1,4 @@
-﻿# AI-Powered-Face-Recognition-Attendance-System
+# AI-Powered-Face-Recognition-Attendance-System
 A robust attendance management system leveraging facial recognition technology to automate student attendance tracking. Built with Django and OpenCV.
 
 ## Features
@@ -81,5 +81,4 @@ A robust attendance management system leveraging facial recognition technology t
 3.  **Workflow**
     *   Go to the "Students" section to add new students and upload their photos.
     *   Ensure the student is "Authorized".
-    *   Go to the "Capture/Recognize" page to start the camera and mark attendance.# Face-attandence-system
-# Face-attandence-system
+    *   Go to the "Capture/Recognize" page to start the camera and mark attendance.

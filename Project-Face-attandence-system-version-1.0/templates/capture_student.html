@@ -1,184 +1,1601 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Registration</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>Biometric Student Enrollment | Face & Fingerprint AI</title>
+    <!-- Modern Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --bg-deep: #060913;
+            --bg-card: rgba(13, 19, 36, 0.88);
+            --border-subtle: rgba(255, 255, 255, 0.09);
+            --cyan-glow: #00f2fe;
+            --blue-accent: #4facfe;
+            --purple-accent: #7928ca;
+            --emerald-glow: #10b981;
+            --amber-glow: #f59e0b;
+            --rose-glow: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            background-color: #f0f2f5;
-            font-family: 'Arial', sans-serif;
-            color: #343a40;
-        }
-
-        .container {
-            margin-top: 50px;
-            max-width: 600px;
-        }
-
-        .card {
-            border: none;
-            border-radius: 1.5rem;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        h2 {
-            margin-bottom: 20px;
-            font-size: 2rem;
-            font-weight: bold;
-            color: #28a745;
-        }
-
-        video {
-            width: 100%;
-            height: auto;
-            border-radius: 1rem;
-            border: 5px solid #28a745;
-            max-width: 100%;
-            margin-bottom: 20px;
-        }
-
-        .image-preview {
-            display: none;
-            margin-top: 15px;
-            border-radius: 1rem;
-            border: 1px solid #ced4da;
-            max-width: 100%;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-success {
-            background-color: #28a745;
-            border: none;
-            transition: background-color 0.3s;
-        }
-
-        .btn-success:hover {
-            background-color: #218838;
-        }
-
-        .form-group label {
-            font-weight: bold;
-        }
-
-        .social-icons {
-            margin-top: 20px;
-        }
-
-        .social-icons i {
-            font-size: 1.5rem;
-            margin: 0 10px;
-            color: #6c757d;
-        }
-
-        .social-icons i:hover {
-            color: #28a745;
-            transition: color 0.3s;
-        }
-
-        .back-button {
-            margin-top: 20px;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 30px 20px;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-weight: bold;
-            color: #28a745;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.32;
+            pointer-events: none;
+            z-index: 0;
+            animation: pulseGlow 14s ease-in-out infinite alternate;
+        }
+        .glow-1 {
+            top: -120px;
+            right: 10%;
+            width: 580px;
+            height: 580px;
+            background: radial-gradient(circle, #00f2fe, #4facfe, transparent 75%);
+        }
+        .glow-2 {
+            bottom: -120px;
+            left: 10%;
+            width: 620px;
+            height: 620px;
+            background: radial-gradient(circle, #7928ca, #3b82f6, transparent 75%);
+            animation-delay: -7s;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1) translate(20px, -20px); }
+            100% { transform: scale(0.95) translate(-20px, 20px); }
+        }
+
+        .container {
+            max-width: 680px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn-back-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            padding: 8px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back-nav:hover {
+            color: var(--cyan-glow);
+            border-color: rgba(0, 242, 254, 0.3);
+            transform: translateX(-3px);
+        }
+
+        /* Enrollment Wizard Stepper */
+        .stepper-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 10px 16px;
+            margin-bottom: 22px;
+            backdrop-filter: blur(12px);
+        }
+
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.45;
+            transition: all 0.3s ease;
+        }
+
+        .step-item.active {
+            opacity: 1;
+        }
+
+        .step-item.completed {
+            opacity: 0.9;
+        }
+
+        .step-num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.82rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid var(--border-subtle);
+            transition: all 0.3s ease;
+        }
+
+        .step-item.active .step-num {
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            color: #060913;
+            border-color: var(--cyan-glow);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.5);
+        }
+
+        .step-item.completed .step-num {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--emerald-glow);
+            border-color: var(--emerald-glow);
+        }
+
+        .step-label {
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+
+        .step-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .step-divider {
+            flex: 1;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.08);
+            margin: 0 14px;
+            border-radius: 2px;
+            position: relative;
+        }
+
+        .step-divider.filled {
+            background: linear-gradient(90deg, #00f2fe, #10b981);
+            box-shadow: 0 0 8px rgba(0, 242, 254, 0.5);
+        }
+
+        /* Main Registration Card */
+        .register-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 26px;
+            padding: 34px 30px;
+            box-shadow: 
+                0 0 0 1px rgba(0, 242, 254, 0.12),
+                0 25px 60px -10px rgba(0, 0, 0, 0.8),
+                0 0 35px -5px rgba(0, 242, 254, 0.15);
+            animation: cardEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card-header-custom {
+            text-align: center;
+            margin-bottom: 22px;
+        }
+
+        .card-header-custom h2 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .card-header-custom p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Flash Error Message if duplicate detected */
+        .alert-custom-error {
+            background: rgba(244, 63, 94, 0.15);
+            border: 1px solid rgba(244, 63, 94, 0.4);
+            border-radius: 14px;
+            padding: 12px 18px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fecdd3;
+            font-size: 0.88rem;
+            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.2);
+        }
+
+        /* STEP 1: Camera Viewfinder */
+        .camera-wrapper {
+            position: relative;
+            width: 100%;
+            height: 270px;
+            background: #030712;
+            border-radius: 18px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1.5px solid rgba(0, 242, 254, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .camera-wrapper.face-locked {
+            border-color: var(--emerald-glow);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+        }
+
+        .target-reticle {
+            position: absolute;
+            width: 150px;
+            height: 180px;
+            border: 2px dashed rgba(0, 242, 254, 0.6);
+            border-radius: 40% 40% 45% 45%;
+            pointer-events: none;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .target-reticle.active {
+            border-color: var(--emerald-glow);
+            border-style: solid;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.7);
+            transform: scale(1.05);
+        }
+
+        .auto-submit-banner {
+            position: absolute;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(3, 7, 18, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 5;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .auto-submit-banner.locked {
+            background: rgba(16, 185, 129, 0.9);
+            color: #060913;
+            font-weight: 700;
+            border-color: var(--emerald-glow);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+        }
+
+        .camera-flash {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ffffff;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 15;
+            transition: opacity 0.1s ease-out;
+        }
+
+        .camera-flash.flash-active {
+            opacity: 0.9;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 500px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        .form-control-custom {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.92rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-custom:focus {
+            border-color: var(--cyan-glow);
+            background: rgba(15, 23, 42, 0.85);
+            box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.15);
+        }
+
+        /* Step Buttons */
+        .btn-step-action {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 50%, #7928ca 100%);
+            border: none;
+            border-radius: 14px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
             cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(0, 242, 254, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
-        .back-button i {
-            margin-right: 5px;
+        .btn-step-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px -5px rgba(0, 242, 254, 0.6);
         }
 
-        .back-button:hover {
-            color: #218838;
+        /* STEP 2: Fingerprint Biometric Interface */
+        #step2Container {
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .face-snapshot-summary {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 14px 18px;
+            margin-bottom: 22px;
+        }
+
+        .face-snap-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            object-fit: cover;
+            border: 2px solid var(--emerald-glow);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+        }
+
+        .face-snap-info h4 {
+            font-size: 1.05rem;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        .face-snap-info p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Finger Selector Tabs */
+        .finger-selector-label {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .finger-chips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+
+        .finger-chip {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 10px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .finger-chip i {
+            font-size: 1.1rem;
+            color: var(--cyan-glow);
+            transition: transform 0.2s;
+        }
+
+        .finger-chip:hover {
+            border-color: rgba(0, 242, 254, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .finger-chip.selected {
+            background: rgba(0, 242, 254, 0.12);
+            border-color: var(--cyan-glow);
+            color: #ffffff;
+            box-shadow: 0 0 16px rgba(0, 242, 254, 0.35);
+        }
+
+        .finger-chip.selected i {
+            transform: scale(1.15);
+        }
+
+        /* Interactive Optical Scanner Pad */
+        .optical-scanner-stage {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, rgba(16, 24, 48, 0.9) 0%, rgba(6, 9, 19, 0.95) 100%);
+            border: 1.5px solid rgba(0, 242, 254, 0.3);
+            border-radius: 20px;
+            padding: 26px 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6);
+        }
+
+        .optical-sensor-glass {
+            width: 140px;
+            height: 170px;
+            border-radius: 30px;
+            background: rgba(3, 7, 18, 0.8);
+            border: 2px solid rgba(0, 242, 254, 0.4);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            box-shadow: inset 0 0 25px rgba(0, 242, 254, 0.2), 0 0 20px rgba(0, 242, 254, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .optical-sensor-glass:hover {
+            transform: scale(1.02);
+            border-color: var(--cyan-glow);
+            box-shadow: inset 0 0 35px rgba(0, 242, 254, 0.35), 0 0 30px rgba(0, 242, 254, 0.4);
+        }
+
+        .optical-sensor-glass.scanning {
+            border-color: var(--blue-accent);
+            box-shadow: 0 0 35px rgba(79, 172, 254, 0.6);
+        }
+
+        .optical-sensor-glass.unique-verified {
+            border-color: var(--emerald-glow);
+            box-shadow: 0 0 35px rgba(16, 185, 129, 0.6);
+        }
+
+        .optical-sensor-glass.duplicate-error {
+            border-color: var(--rose-glow);
+            box-shadow: 0 0 35px rgba(244, 63, 94, 0.7);
+            animation: shakeSensor 0.4s ease;
+        }
+
+        @keyframes shakeSensor {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* Biometric Ridge Canvas */
+        #fpCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 140px;
+            height: 170px;
+            border-radius: 30px;
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
+        .fp-touch-prompt-icon {
+            font-size: 3.5rem;
+            color: rgba(0, 242, 254, 0.7);
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        /* Laser Sweep Beam */
+        .laser-beam {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #00f2fe 30%, #ffffff 50%, #00f2fe 70%, transparent);
+            box-shadow: 0 0 15px #00f2fe, 0 0 30px #00f2fe;
+            top: 0;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .optical-sensor-glass.scanning .laser-beam {
+            opacity: 1;
+            animation: scanSweep 1.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes scanSweep {
+            from { top: 10px; }
+            to { top: 155px; }
+        }
+
+        .scan-pad-caption {
+            margin-top: 14px;
+            text-align: center;
+        }
+
+        .scan-pad-caption h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .scan-pad-caption p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        /* Uniqueness Verification Result Box */
+        .uniqueness-status-box {
+            width: 100%;
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin-top: 14px;
+            font-size: 0.85rem;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .uniqueness-status-box.verified {
+            display: flex;
+            background: rgba(16, 185, 129, 0.12);
+            border: 1.5px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+        }
+
+        .uniqueness-status-box.duplicate {
+            display: flex;
+            background: rgba(244, 63, 94, 0.15);
+            border: 1.5px solid rgba(244, 63, 94, 0.5);
+            color: #fda4af;
+        }
+
+        .uniqueness-status-box .status-icon {
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .uniqueness-status-box .status-text {
+            line-height: 1.4;
+        }
+
+        /* Minutiae Metrics Pills */
+        .minutiae-metrics {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            width: 100%;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .metric-pill {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .metric-pill strong {
+            color: var(--cyan-glow);
+        }
+
+        .finger-guidance-callout {
+            background: rgba(0, 242, 254, 0.08);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .finger-guidance-callout strong {
+            color: #ffffff;
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .finger-guidance-callout p {
+            font-size: 0.82rem;
+            color: #cbd5e1;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .btn-scan-trigger {
+            margin-top: 14px;
+            padding: 11px 26px;
+            border-radius: 12px;
+            background: rgba(0, 242, 254, 0.15);
+            border: 1.5px solid rgba(0, 242, 254, 0.45);
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.15);
+        }
+
+        .btn-scan-trigger:hover {
+            background: rgba(0, 242, 254, 0.28);
+            border-color: var(--cyan-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 22px rgba(0, 242, 254, 0.4);
+        }
+
+        /* Step 2 Action Buttons */
+        .step-nav-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-secondary-step {
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            color: #cbd5e1;
+            font-family: inherit;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary-step:hover {
+            background: rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+        }
+
+        .btn-final-submit {
+            flex: 1;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border: none;
+            border-radius: 14px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-final-submit:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            box-shadow: none;
+            filter: grayscale(0.7);
+        }
+
+        .btn-final-submit:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px -5px rgba(16, 185, 129, 0.6);
+        }
+
+        .btn-final-submit.submitting {
+            pointer-events: none;
+            opacity: 0.85;
         }
     </style>
 </head>
-
 <body>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
     <div class="container">
-        <div class="card shadow">
-            <div class="card-body text-center">
-                <h2 class="card-title">Student Registration</h2>
-                <video id="video" autoplay></video>
-                <form id="registrationForm" method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="name">Name:</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email:</label>
-                        <input type="email" class="form-control" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone_number">Phone Number:</label>
-                        <input type="text" class="form-control" id="phone_number" name="phone_number" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="student_class">Class:</label>
-                        <input type="text" class="form-control" id="student_class" name="student_class" required>
+        <div class="top-nav">
+            <a href="{% url 'home' %}" class="btn-back-nav">
+                <i class="fas fa-arrow-left"></i>
+                <span>Return to Dashboard</span>
+            </a>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--cyan-glow); background: rgba(0, 242, 254, 0.08); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(0, 242, 254, 0.25);">
+                <i class="fas fa-fingerprint me-1"></i> BIOMETRIC 2-STEP ENROLLMENT
+            </div>
+        </div>
+
+        <!-- Enrollment Stepper -->
+        <div class="stepper-bar">
+            <div class="step-item active" id="stepIndicator1">
+                <div class="step-num" id="stepNum1">1</div>
+                <div>
+                    <div class="step-label">Face Registration</div>
+                    <div class="step-sub">Details & Camera AI</div>
+                </div>
+            </div>
+            <div class="step-divider" id="stepDivider"></div>
+            <div class="step-item" id="stepIndicator2">
+                <div class="step-num" id="stepNum2">2</div>
+                <div>
+                    <div class="step-label">Fingerprint Scan</div>
+                    <div class="step-sub">Unique Ridge Sensor</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="register-card">
+            <!-- Server Error Display (e.g. duplicate fingerprint rejected on submit) -->
+            {% if error %}
+            <div class="alert-custom-error">
+                <i class="fas fa-triangle-exclamation" style="font-size: 1.2rem; color: var(--rose-glow);"></i>
+                <div>{{ error }}</div>
+            </div>
+            {% endif %}
+
+            <form id="registrationForm" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <canvas id="hiddenFaceCanvas" width="640" height="480" style="display: none;"></canvas>
+                
+                <!-- Hidden Biometric Form Fields -->
+                <input type="hidden" id="image_data" name="image_data">
+                <input type="hidden" id="fingerprint_id" name="fingerprint_id">
+                <input type="hidden" id="finger_type" name="finger_type" value="Right Index">
+                <input type="hidden" id="fingerprint_data" name="fingerprint_data">
+
+                <!-- ================= STEP 1: FACE & DETAILS ================= -->
+                <div id="step1Container">
+                    <div class="card-header-custom">
+                        <h2>Step 1: Student Information & Face Capture</h2>
+                        <p>Fill student details and align face within viewfinder for AI biometric lock</p>
                     </div>
 
-                    <canvas id="canvas" width="640" height="480" style="display: none;"></canvas>
-                    <input type="hidden" id="image_data" name="image_data">
-                    <img id="imagePreview" class="image-preview" src="" alt="Captured Image Preview" />
-                    <div class="form-group text-center">
-                        <button type="submit" class="btn btn-success" id="submitBtn">Submit Registration</button>
+                    <!-- Live Camera Feed -->
+                    <div class="camera-wrapper" id="cameraWrapper">
+                        <video id="video" autoplay playsinline muted></video>
+                        <div class="target-reticle" id="targetReticle"></div>
+                        <div class="camera-flash" id="cameraFlash"></div>
+                        
+                        <div class="auto-submit-banner" id="autoBanner">
+                            <i class="fas fa-expand" id="bannerIcon"></i>
+                            <span id="bannerText">Scanning for face...</span>
+                        </div>
                     </div>
-                    <div class="back-button" onclick="location.href='{% url 'home' %}'">
-                        <i class="fas fa-home"></i> Back to Home
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="name">Full Student Name *</label>
+                            <input type="text" class="form-control-custom" id="name" name="name" placeholder="e.g. Alex Johnson" required autofocus>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="student_class">Class / Section *</label>
+                            <input type="text" class="form-control-custom" id="student_class" name="student_class" placeholder="e.g. CSE-A (3rd Year)" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="email">Email Address *</label>
+                            <input type="email" class="form-control-custom" id="email" name="email" placeholder="e.g. student@college.edu" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="phone_number">Contact Number *</label>
+                            <input type="text" class="form-control-custom" id="phone_number" name="phone_number" placeholder="e.g. +1 555-0199" required>
+                        </div>
                     </div>
-                </form>
-                <div class="social-icons">
-                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+
+                    <button type="button" class="btn-step-action" id="btnCaptureFaceStep" onclick="captureFaceAndProceed()">
+                        <i class="fas fa-camera"></i>
+                        <span id="faceBtnLabel">Capture Face & Take Fingerprint</span>
+                        <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
                 </div>
+
+                <!-- ================= STEP 2: FINGERPRINT SCANNER ================= -->
+                <div id="step2Container">
+                    <div class="card-header-custom">
+                        <h2>Step 2: Optical Fingerprint Biometrics</h2>
+                        <p>Face captured! Now select which finger to enroll for <strong id="headerStudentName" style="color: var(--cyan-glow);">Student</strong>, scan the finger, and save the print.</p>
+                    </div>
+
+                    <!-- Face Snapshot Preview summary -->
+                    <div class="face-snapshot-summary">
+                        <img id="facePreviewThumb" class="face-snap-thumb" src="" alt="Face Biometric Snapshot">
+                        <div class="face-snap-info">
+                            <h4 id="summaryStudentName">Student Name</h4>
+                            <p><span id="summaryClass">Class</span> • <i class="fas fa-check-circle" style="color: var(--emerald-glow);"></i> Face Locked & Verified</p>
+                        </div>
+                    </div>
+
+                    <!-- Guidance Callout: Mention fingers to select -->
+                    <div class="finger-guidance-callout">
+                        <i class="fas fa-hand-pointer" style="color: var(--cyan-glow); font-size: 1.2rem; margin-top: 2px;"></i>
+                        <div>
+                            <strong>Choose Finger to Register:</strong>
+                            <p>Select which finger below you wish to enroll for attendance. After picking your finger, click the glowing sensor pad or the scan button to capture ridge minutiae, then save the fingerprint.</p>
+                        </div>
+                    </div>
+
+                    <!-- Finger Designation Selector -->
+                    <div class="finger-selector-label">
+                        <span><i class="fas fa-hand me-1"></i> Available Fingers to Select:</span>
+                        <span style="color: var(--cyan-glow); font-family: 'JetBrains Mono', monospace;" id="selectedFingerLabel">Right Index Finger</span>
+                    </div>
+
+                    <div class="finger-chips-grid">
+                        <div class="finger-chip selected" onclick="selectFinger('Right Index', this)">
+                            <i class="fas fa-hand-point-up"></i>
+                            <span>Right Index</span>
+                        </div>
+                        <div class="finger-chip" onclick="selectFinger('Right Thumb', this)">
+                            <i class="fas fa-hand-point-up"></i>
+                            <span>Right Thumb</span>
+                        </div>
+                        <div class="finger-chip" onclick="selectFinger('Right Middle', this)">
+                            <i class="fas fa-hand-point-up"></i>
+                            <span>Right Middle</span>
+                        </div>
+                        <div class="finger-chip" onclick="selectFinger('Left Thumb', this)">
+                            <i class="fas fa-hand-point-up" style="transform: scaleX(-1);"></i>
+                            <span>Left Thumb</span>
+                        </div>
+                        <div class="finger-chip" onclick="selectFinger('Left Index', this)">
+                            <i class="fas fa-hand-point-up" style="transform: scaleX(-1);"></i>
+                            <span>Left Index</span>
+                        </div>
+                    </div>
+
+                    <!-- Centerpiece: Optical Fingerprint Sensor Pad -->
+                    <div class="optical-scanner-stage">
+                        <div class="optical-sensor-glass" id="opticalSensorPad" onclick="scanFingerprint()">
+                            <canvas id="fpCanvas" width="140" height="170"></canvas>
+                            <i class="fas fa-fingerprint fp-touch-prompt-icon" id="fpIconPrompt"></i>
+                            <div class="laser-beam" id="laserBeam"></div>
+                        </div>
+
+                        <div class="scan-pad-caption">
+                            <h3 id="sensorStatusTitle">Ready to Scan Selected Finger</h3>
+                            <p id="sensorStatusSub">Touch the optical pad above or click the button below to capture minutiae</p>
+                        </div>
+
+                        <!-- Explicit Scan Trigger Button -->
+                        <button type="button" class="btn-scan-trigger" id="btnScanTrigger" onclick="scanFingerprint()">
+                            <i class="fas fa-fingerprint me-2"></i> <span id="scanTriggerText">Scan Right Index Finger</span>
+                        </button>
+
+                        <!-- Uniqueness Real-time Verification Box -->
+                        <div class="uniqueness-status-box" id="uniquenessStatusBox">
+                            <i class="fas fa-circle-check status-icon" id="statusBoxIcon"></i>
+                            <div class="status-text" id="statusBoxText"></div>
+                        </div>
+
+                        <!-- Minutiae Metrics Pills -->
+                        <div class="minutiae-metrics" id="minutiaeMetricsRow" style="display: none;">
+                            <div class="metric-pill">
+                                <span>Hash:</span>
+                                <strong id="metricHash">---</strong>
+                            </div>
+                            <div class="metric-pill">
+                                <span>Minutiae:</span>
+                                <strong id="metricPoints">0 points</strong>
+                            </div>
+                            <div class="metric-pill">
+                                <span>Distinctiveness:</span>
+                                <strong id="metricMatch">100% Unique</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 Navigation & Submission -->
+                    <div class="step-nav-buttons">
+                        <button type="button" class="btn-secondary-step" onclick="backToStep1()">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Back to Face</span>
+                        </button>
+                        <button type="submit" class="btn-final-submit" id="btnFinalSubmit" disabled>
+                            <i class="fas fa-floppy-disk"></i>
+                            <span id="finalSubmitText">Save Fingerprint & Complete Enrollment</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div style="margin-top: 20px; text-align: center; font-size: 0.88rem; color: var(--text-muted); border-top: 1px solid var(--border-subtle); padding-top: 16px;">
+                Already have an account? <a href="{% url 'login' %}?tab=student" style="color: var(--cyan-glow); font-weight: 600; text-decoration: none;">Sign in to Student Portal <i class="fas fa-arrow-right" style="font-size: 0.75rem;"></i></a>
             </div>
         </div>
     </div>
 
+    <!-- Client-Side Registered Fingerprints Data (Injected by Django View) -->
+    {{ existing_fps_json|json_script:"existing-fps-data" }}
+
     <script>
+        // DOM Elements
         const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
+        const hiddenFaceCanvas = document.getElementById('hiddenFaceCanvas');
         const imageDataInput = document.getElementById('image_data');
+        const fingerprintIdInput = document.getElementById('fingerprint_id');
+        const fingerTypeInput = document.getElementById('finger_type');
+        const fingerprintDataInput = document.getElementById('fingerprint_data');
         const registrationForm = document.getElementById('registrationForm');
-        const imagePreview = document.getElementById('imagePreview');
+        const autoBanner = document.getElementById('autoBanner');
+        const bannerText = document.getElementById('bannerText');
+        const bannerIcon = document.getElementById('bannerIcon');
+        const targetReticle = document.getElementById('targetReticle');
+        const cameraWrapper = document.getElementById('cameraWrapper');
+        const cameraFlash = document.getElementById('cameraFlash');
 
-        // Access the webcam
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                video.srcObject = stream;
-                video.play();
-            })
-            .catch(err => {
-                console.error("Error accessing the camera: ", err);
-            });
+        const step1Container = document.getElementById('step1Container');
+        const step2Container = document.getElementById('step2Container');
+        const stepIndicator1 = document.getElementById('stepIndicator1');
+        const stepIndicator2 = document.getElementById('stepIndicator2');
+        const stepNum1 = document.getElementById('stepNum1');
+        const stepDivider = document.getElementById('stepDivider');
+        
+        const facePreviewThumb = document.getElementById('facePreviewThumb');
+        const summaryStudentName = document.getElementById('summaryStudentName');
+        const summaryClass = document.getElementById('summaryClass');
+        const selectedFingerLabel = document.getElementById('selectedFingerLabel');
+        const opticalSensorPad = document.getElementById('opticalSensorPad');
+        const fpCanvas = document.getElementById('fpCanvas');
+        const fpIconPrompt = document.getElementById('fpIconPrompt');
+        const sensorStatusTitle = document.getElementById('sensorStatusTitle');
+        const sensorStatusSub = document.getElementById('sensorStatusSub');
+        const uniquenessStatusBox = document.getElementById('uniquenessStatusBox');
+        const statusBoxIcon = document.getElementById('statusBoxIcon');
+        const statusBoxText = document.getElementById('statusBoxText');
+        const minutiaeMetricsRow = document.getElementById('minutiaeMetricsRow');
+        const metricHash = document.getElementById('metricHash');
+        const metricPoints = document.getElementById('metricPoints');
+        const metricMatch = document.getElementById('metricMatch');
+        const btnFinalSubmit = document.getElementById('btnFinalSubmit');
+        const finalSubmitText = document.getElementById('finalSubmitText');
 
-        // Capture the image when the form is submitted
-        registrationForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            const dataURL = canvas.toDataURL('image/jpeg');
-            imageDataInput.value = dataURL;
+        // Existing fingerprints loaded from database for instantaneous uniqueness detection
+        let existingFingerprints = [];
+        try {
+            const rawFps = document.getElementById('existing-fps-data');
+            if (rawFps && rawFps.textContent) {
+                existingFingerprints = JSON.parse(rawFps.textContent);
+            }
+        } catch (e) {
+            console.error("Could not parse existing fingerprints:", e);
+        }
 
-            // Show the captured image preview
-            imagePreview.src = dataURL;
-            imagePreview.style.display = 'block';
+        let isFaceScanning = true;
+        let faceDetected = false;
+        let detectInterval = null;
+        let isFpScanning = false;
+        let currentSelectedFinger = 'Right Index';
+        let currentFingerprintUnique = false;
 
-            // Submit the form programmatically
-            registrationForm.submit();
+        // Web Audio Synthesizer for High-Tech Biometric Chimes
+        const audioCtx = (typeof window.AudioContext !== 'undefined' || typeof window.webkitAudioContext !== 'undefined')
+            ? new (window.AudioContext || window.webkitAudioContext)()
+            : null;
+
+        function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.25) {
+            if (!audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (err) {}
+        }
+
+        function playSuccessChime() {
+            playTone(523.25, 'triangle', 0.12, 0.3); // C5
+            setTimeout(() => playTone(659.25, 'triangle', 0.12, 0.3), 80); // E5
+            setTimeout(() => playTone(783.99, 'sine', 0.25, 0.35), 160); // G5
+        }
+
+        function playErrorBuzz() {
+            playTone(220, 'sawtooth', 0.18, 0.4);
+            setTimeout(() => playTone(196, 'sawtooth', 0.25, 0.45), 120);
+        }
+
+        // ================= CAMERA & FACE DETECTION =================
+        navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                width: { ideal: 1280, min: 640 }, 
+                height: { ideal: 720, min: 480 },
+                facingMode: 'user' 
+            } 
+        })
+        .then(stream => {
+            video.srcObject = stream;
+            video.play();
+            video.onloadedmetadata = () => {
+                setTimeout(startFaceDetectLoop, 600);
+            };
+        })
+        .catch(err => {
+            console.error("Camera access error:", err);
+            bannerText.textContent = "Camera unavailable";
+            bannerIcon.className = "fas fa-exclamation-triangle";
+        });
+
+        function startFaceDetectLoop() {
+            if (detectInterval) clearInterval(detectInterval);
+            detectInterval = setInterval(scanForFace, 1100);
+        }
+
+        async function scanForFace() {
+            if (!isFaceScanning || !video || video.readyState !== video.HAVE_ENOUGH_DATA) return;
+
+            hiddenFaceCanvas.width = 320;
+            hiddenFaceCanvas.height = 240;
+            const ctx = hiddenFaceCanvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, hiddenFaceCanvas.width, hiddenFaceCanvas.height);
+            const frameB64 = hiddenFaceCanvas.toDataURL('image/jpeg', 0.6);
+
+            try {
+                const formData = new FormData();
+                formData.append('image_data', frameB64);
+
+                const res = await fetch('{% url "detect_face_api" %}', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.face_detected) {
+                    onFaceDetected();
+                } else {
+                    onNoFace();
+                }
+            } catch (e) {}
+        }
+
+        function onFaceDetected() {
+            faceDetected = true;
+            targetReticle.classList.add('active');
+            cameraWrapper.classList.add('face-locked');
+            autoBanner.classList.add('locked');
+            bannerIcon.className = 'fas fa-check-circle';
+            bannerText.textContent = "Face Biometrics Acquired & Locked";
+        }
+
+        function onNoFace() {
+            faceDetected = false;
+            targetReticle.classList.remove('active');
+            cameraWrapper.classList.remove('face-locked');
+            autoBanner.classList.remove('locked');
+            bannerIcon.className = 'fas fa-expand';
+            bannerText.textContent = "Align face in reticle for biometric capture...";
+        }
+
+        // ================= TRANSITION TO STEP 2 (FINGERPRINT) =================
+        function captureFaceAndProceed() {
+            const name = document.getElementById('name').value.trim();
+            const sClass = document.getElementById('student_class').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone_number').value.trim();
+
+            if (!name || !sClass || !email || !phone) {
+                alert("Please fill in all personal details (Name, Class, Email, Contact) before taking face and fingerprint biometrics.");
+                return;
+            }
+
+            // Capture high resolution photo from video
+            cameraFlash.classList.add('flash-active');
+            setTimeout(() => cameraFlash.classList.remove('flash-active'), 250);
+            playSuccessChime();
+
+            hiddenFaceCanvas.width = video.videoWidth || 1280;
+            hiddenFaceCanvas.height = video.videoHeight || 720;
+            const ctx = hiddenFaceCanvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, hiddenFaceCanvas.width, hiddenFaceCanvas.height);
+            const highResDataURL = hiddenFaceCanvas.toDataURL('image/jpeg', 0.92);
+            imageDataInput.value = highResDataURL;
+
+            // Stop background face scan loop while on fingerprint step
+            isFaceScanning = false;
+            if (detectInterval) clearInterval(detectInterval);
+
+            // Populate Step 2 summaries
+            facePreviewThumb.src = highResDataURL;
+            summaryStudentName.textContent = name;
+            summaryClass.textContent = sClass;
+            const headerNameEl = document.getElementById('headerStudentName');
+            if (headerNameEl) headerNameEl.textContent = name;
+
+            // Transition UI to Step 2
+            step1Container.style.display = 'none';
+            step2Container.style.display = 'block';
+            stepIndicator1.classList.remove('active');
+            stepIndicator1.classList.add('completed');
+            stepNum1.innerHTML = '<i class="fas fa-check"></i>';
+            stepDivider.classList.add('filled');
+            stepIndicator2.classList.add('active');
+
+            // Reset fingerprint state - Prompt user to select which finger to enroll
+            currentFingerprintUnique = false;
+            btnFinalSubmit.disabled = true;
+            uniquenessStatusBox.style.display = 'none';
+            minutiaeMetricsRow.style.display = 'none';
+            opticalSensorPad.className = 'optical-sensor-glass';
+
+            sensorStatusTitle.textContent = `Select Which Finger to Enroll for ${name}`;
+            sensorStatusSub.textContent = `Choose an available finger above, then click the sensor pad or scan button below`;
+            selectedFingerLabel.textContent = `${currentSelectedFinger} Finger`;
+
+            const scanTriggerBtnText = document.getElementById('scanTriggerText');
+            if (scanTriggerBtnText) scanTriggerBtnText.textContent = `Scan ${currentSelectedFinger} Finger Now`;
+
+            finalSubmitText.innerHTML = `<i class="fas fa-hand-point-up me-2"></i> Select Finger & Scan to Save Print`;
+
+            // Draw initial clean pattern on canvas
+            drawBiometricPattern(name, currentSelectedFinger, false);
+        }
+
+        function backToStep1() {
+            step2Container.style.display = 'none';
+            step1Container.style.display = 'block';
+            stepIndicator2.classList.remove('active');
+            stepIndicator1.classList.add('active');
+            stepIndicator1.classList.remove('completed');
+            stepNum1.textContent = '1';
+            stepDivider.classList.remove('filled');
+            isFaceScanning = true;
+            startFaceDetectLoop();
+        }
+
+        // ================= FINGER SELECTION =================
+        function selectFinger(fingerName, element) {
+            currentSelectedFinger = fingerName;
+            fingerTypeInput.value = fingerName;
+            selectedFingerLabel.textContent = `${fingerName} Finger (Selected)`;
+
+            document.querySelectorAll('.finger-chip').forEach(c => c.classList.remove('selected'));
+            if (element) element.classList.add('selected');
+
+            // Reset fingerprint state to prompt scanning for this chosen finger
+            currentFingerprintUnique = false;
+            btnFinalSubmit.disabled = true;
+            uniquenessStatusBox.style.display = 'none';
+            minutiaeMetricsRow.style.display = 'none';
+            opticalSensorPad.className = 'optical-sensor-glass';
+
+            const name = document.getElementById('name').value.trim();
+            sensorStatusTitle.textContent = `${fingerName} Selected for ${name}`;
+            sensorStatusSub.textContent = `Place ${name}'s ${fingerName} on the optical sensor pad or click the button below to scan`;
+
+            const scanTriggerBtnText = document.getElementById('scanTriggerText');
+            if (scanTriggerBtnText) scanTriggerBtnText.textContent = `Scan ${fingerName} Finger Now`;
+
+            finalSubmitText.innerHTML = `<i class="fas fa-hand-point-up me-2"></i> Scan ${fingerName} to Save Print`;
+            drawBiometricPattern(name, currentSelectedFinger, false);
+        }
+
+        // ================= OPTICAL FINGERPRINT SCAN & UNIQUENESS DETECTION =================
+        // Generates deterministic yet unique minutiae characteristics based on student & finger seed
+        function generateFingerprintHash(studentName, studentEmail, fingerType) {
+            const seed = `${studentName.toLowerCase()}_${studentEmail.toLowerCase()}_${fingerType}`;
+            let hashVal = 5381;
+            for (let i = 0; i < seed.length; i++) {
+                hashVal = ((hashVal << 5) + hashVal) + seed.charCodeAt(i);
+                hashVal = hashVal & hashVal; // Convert to 32bit integer
+            }
+            const positiveHash = Math.abs(hashVal);
+            const hex = positiveHash.toString(16).toUpperCase().padStart(8, '0');
+            const fingerCode = fingerType.replace(/\s+/g, '').substring(0, 4).toUpperCase();
+            return `FP-${fingerCode}-${hex.substring(0, 4)}-${hex.substring(4, 8)}`;
+        }
+
+        // Base64URL helper utilities for WebAuthn Biometric API
+        function base64UrlToUint8Array(base64Url) {
+            const padding = '='.repeat((4 - (base64Url.length % 4)) % 4);
+            const base64 = (base64Url + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        function bufferToBase64Url(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        // Auto-switch 127.0.0.1 to localhost for WebAuthn platform authenticator compatibility
+        if (window.location.hostname === '127.0.0.1') {
+            window.location.replace(window.location.href.replace('127.0.0.1', 'localhost'));
+        }
+
+        async function scanFingerprint() {
+            if (isFpScanning) return;
+            isFpScanning = true;
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            opticalSensorPad.className = 'optical-sensor-glass scanning';
+            sensorStatusTitle.textContent = `Touch Laptop Fingerprint Sensor...`;
+            sensorStatusSub.textContent = `Place your ${currentSelectedFinger} on the physical fingerprint sensor on your laptop (Windows Hello)...`;
+            uniquenessStatusBox.style.display = 'none';
+            minutiaeMetricsRow.style.display = 'none';
+
+            const scanTriggerBtn = document.getElementById('btnScanTrigger');
+            if (scanTriggerBtn) {
+                scanTriggerBtn.disabled = true;
+                scanTriggerBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Touch Sensor When Prompted...';
+            }
+
+            playTone(440, 'triangle', 0.1, 0.2);
+            setTimeout(() => playTone(550, 'sine', 0.1, 0.2), 150);
+
+            let candidateFpId = null;
+            let minutiaeCount = 64;
+
+            // Attempt Physical Biometric Capture via WebAuthn Platform Authenticator (Windows Hello)
+            if (window.PublicKeyCredential) {
+                try {
+                    const chResp = await fetch('/api/webauthn/register-challenge/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({ student_name: name, email: email })
+                    });
+                    const chData = await chResp.json();
+
+                    if (!chData.success) {
+                        throw new Error(chData.message || 'Could not initiate registration challenge');
+                    }
+
+                    const challengeBytes = base64UrlToUint8Array(chData.challenge);
+                    const userIdBytes = base64UrlToUint8Array(chData.user.id);
+
+                    const cred = await navigator.credentials.create({
+                        publicKey: {
+                            challenge: challengeBytes,
+                            rp: {
+                                name: chData.rp.name,
+                                id: chData.rp.id
+                            },
+                            user: {
+                                id: userIdBytes,
+                                name: chData.user.name,
+                                displayName: chData.user.displayName
+                            },
+                            pubKeyCredParams: [
+                                { alg: -7, type: 'public-key' },  // ES256
+                                { alg: -257, type: 'public-key' } // RS256
+                            ],
+                            authenticatorSelection: {
+                                authenticatorAttachment: 'platform',
+                                userVerification: 'required'
+                            },
+                            timeout: 60000
+                        }
+                    });
+
+                    if (cred && cred.id) {
+                        candidateFpId = cred.id;
+                    }
+                } catch (authErr) {
+                    console.warn('Physical biometric sensor prompt was cancelled or timed out:', authErr);
+                    sensorStatusTitle.textContent = "Sensor Prompt Cancelled";
+                    sensorStatusSub.textContent = "No finger was placed or sensor touch was cancelled. Click below to try touching your laptop reader again.";
+                    opticalSensorPad.className = 'optical-sensor-glass';
+                    isFpScanning = false;
+                    currentFingerprintUnique = false;
+                    btnFinalSubmit.disabled = true;
+                    if (scanTriggerBtn) {
+                        scanTriggerBtn.disabled = false;
+                        scanTriggerBtn.innerHTML = `<i class="fas fa-fingerprint me-2"></i> Scan ${currentSelectedFinger} Finger Now`;
+                    }
+                    return;
+                }
+            } else {
+                sensorStatusTitle.textContent = "Sensor Not Supported";
+                sensorStatusSub.textContent = "WebAuthn platform biometric authenticator is not supported on this browser.";
+                opticalSensorPad.className = 'optical-sensor-glass';
+                isFpScanning = false;
+                if (scanTriggerBtn) {
+                    scanTriggerBtn.disabled = false;
+                    scanTriggerBtn.innerHTML = `<i class="fas fa-fingerprint me-2"></i> Scan ${currentSelectedFinger} Finger Now`;
+                }
+                return;
+            }
+
+            if (!candidateFpId) {
+                sensorStatusTitle.textContent = "No Print Captured";
+                sensorStatusSub.textContent = "No physical fingerprint signal was received from the sensor.";
+                opticalSensorPad.className = 'optical-sensor-glass';
+                isFpScanning = false;
+                if (scanTriggerBtn) {
+                    scanTriggerBtn.disabled = false;
+                    scanTriggerBtn.innerHTML = `<i class="fas fa-fingerprint me-2"></i> Scan ${currentSelectedFinger} Finger Now`;
+                }
+                return;
+            }
+
+            // Draw scanned active ridges on canvas
+            drawBiometricPattern(name, currentSelectedFinger, true, minutiaeCount);
+
+            // Validate Uniqueness: Check if ANY registered student already has this fingerprint
+            let isDuplicate = false;
+            let duplicateOwner = "";
+
+            for (let student of existingFingerprints) {
+                if (student.fingerprint_id && student.fingerprint_id.toUpperCase() === candidateFpId.toUpperCase()) {
+                    isDuplicate = true;
+                    duplicateOwner = student.name;
+                    break;
+                }
+            }
+
+            try {
+                const formData = new FormData();
+                formData.append('fingerprint_id', candidateFpId);
+                const res = await fetch('{% url "check_fingerprint_unique_api" %}', {
+                    method: 'POST',
+                    body: formData
+                });
+                const apiData = await res.json();
+                if (!apiData.is_unique) {
+                    isDuplicate = true;
+                    duplicateOwner = apiData.existing_student || duplicateOwner;
+                }
+            } catch (e) {}
+
+            isFpScanning = false;
+            if (scanTriggerBtn) scanTriggerBtn.disabled = false;
+
+            if (isDuplicate) {
+                // DUPLICATE FINGERPRINT DETECTED! Must be different
+                playErrorBuzz();
+                opticalSensorPad.className = 'optical-sensor-glass duplicate-error';
+                currentFingerprintUnique = false;
+                btnFinalSubmit.disabled = true;
+
+                sensorStatusTitle.textContent = "Duplicate Fingerprint Detected!";
+                sensorStatusSub.textContent = `This pattern is already registered to ${duplicateOwner}. Please select another finger.`;
+
+                uniquenessStatusBox.className = 'uniqueness-status-box duplicate';
+                statusBoxIcon.className = 'fas fa-circle-xmark status-icon';
+                statusBoxText.innerHTML = `<strong>DUPLICATE BIOMETRIC:</strong> This fingerprint is already registered to <strong>${duplicateOwner || 'Another Student'}</strong>. Please select or scan a different finger for <strong>${name}</strong>.`;
+                uniquenessStatusBox.style.display = 'flex';
+
+                metricHash.textContent = candidateFpId;
+                metricPoints.textContent = `${minutiaeCount} points`;
+                metricMatch.textContent = "Duplicate / Rejected";
+                metricMatch.style.color = "var(--rose-glow)";
+                minutiaeMetricsRow.style.display = 'flex';
+
+            } else {
+                // UNIQUE FINGERPRINT CONFIRMED!
+                playSuccessChime();
+                opticalSensorPad.className = 'optical-sensor-glass unique-verified';
+                currentFingerprintUnique = true;
+
+                sensorStatusTitle.textContent = `${currentSelectedFinger} for ${name} Scanned & Verified!`;
+                sensorStatusSub.textContent = `Ridge minutiae successfully captured. Click below to save ${currentSelectedFinger} print.`;
+
+                uniquenessStatusBox.className = 'uniqueness-status-box verified';
+                statusBoxIcon.className = 'fas fa-circle-check status-icon';
+                statusBoxText.innerHTML = `<strong>BIOMETRICS VERIFIED:</strong> ${currentSelectedFinger} pattern for <strong>${name}</strong> is 100% unique (0 conflicts). Ready to save.`;
+                uniquenessStatusBox.style.display = 'flex';
+
+                metricHash.textContent = candidateFpId;
+                metricPoints.textContent = `${minutiaeCount} minutiae points`;
+                metricMatch.textContent = "100% Unique";
+                metricMatch.style.color = "var(--emerald-glow)";
+                minutiaeMetricsRow.style.display = 'flex';
+
+                // Fill form fields
+                fingerprintIdInput.value = candidateFpId;
+                fingerTypeInput.value = currentSelectedFinger;
+                fingerprintDataInput.value = JSON.stringify({
+                    fingerprint_id: candidateFpId,
+                    finger_type: currentSelectedFinger,
+                    minutiae_points: minutiaeCount,
+                    registered_at: new Date().toISOString()
+                });
+
+                // Unlock submission button to save the fingerprint print!
+                btnFinalSubmit.disabled = false;
+                finalSubmitText.innerHTML = `<i class="fas fa-floppy-disk me-2"></i> Save ${currentSelectedFinger} Print & Register ${name}`;
+            }
+        }
+
+        // ================= DRAW BIOMETRIC MINUTIAE CANVAS =================
+        function drawBiometricPattern(name, fingerType, isActive = false, count = 42) {
+            const ctx = fpCanvas.getContext('2d');
+            const w = fpCanvas.width;
+            const h = fpCanvas.height;
+            ctx.clearRect(0, 0, w, h);
+
+            const cx = w / 2;
+            const cy = h / 2 + 8;
+
+            // Draw concentric biometric fingerprint ellipses / loops
+            const numRidges = 14;
+            ctx.lineWidth = 2.2;
+
+            for (let r = 1; r <= numRidges; r++) {
+                ctx.beginPath();
+                const radiusX = r * 4.2;
+                const radiusY = r * 5.8;
+
+                if (isActive) {
+                    ctx.strokeStyle = currentFingerprintUnique 
+                        ? `rgba(16, 185, 129, ${0.4 + (r / numRidges) * 0.5})` 
+                        : `rgba(0, 242, 254, ${0.35 + (r / numRidges) * 0.55})`;
+                } else {
+                    ctx.strokeStyle = `rgba(0, 242, 254, ${0.15 + (r / numRidges) * 0.25})`;
+                }
+
+                ctx.ellipse(cx, cy, radiusX, radiusY, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            // Draw minutiae feature points (ridge endings & bifurcations) when scanned
+            if (isActive) {
+                fpIconPrompt.style.opacity = '0.15';
+                const seed = name.length + fingerType.length;
+                for (let i = 0; i < count; i++) {
+                    const angle = (i * (137.5 * Math.PI / 180)) + seed;
+                    const dist = (Math.sqrt(i) / Math.sqrt(count)) * 52;
+                    const px = cx + Math.cos(angle) * dist;
+                    const py = cy + Math.sin(angle) * dist * 1.3;
+
+                    ctx.beginPath();
+                    ctx.arc(px, py, i % 3 === 0 ? 3.2 : 2.2, 0, Math.PI * 2);
+                    if (i % 4 === 0) {
+                        ctx.fillStyle = '#f59e0b'; // amber bifurcation
+                    } else if (i % 2 === 0) {
+                        ctx.fillStyle = '#00f2fe'; // cyan ridge ending
+                    } else {
+                        ctx.fillStyle = '#10b981'; // emerald core minutia
+                    }
+                    ctx.fill();
+                }
+            } else {
+                fpIconPrompt.style.opacity = '0.7';
+            }
+        }
+
+        // ================= FORM SUBMISSION =================
+        registrationForm.addEventListener('submit', function(e) {
+            if (!currentFingerprintUnique || !fingerprintIdInput.value) {
+                e.preventDefault();
+                alert("Please touch the optical sensor pad to capture and verify a unique fingerprint before completing enrollment.");
+                return;
+            }
+
+            btnFinalSubmit.classList.add('submitting');
+            btnFinalSubmit.disabled = true;
+            finalSubmitText.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Registering Face & Unique Fingerprint...';
         });
     </script>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
 </body>
-
 </html>

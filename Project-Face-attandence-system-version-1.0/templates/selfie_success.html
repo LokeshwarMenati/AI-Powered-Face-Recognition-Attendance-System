@@ -3,85 +3,399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Success</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Registration Successful | AI Attendance System</title>
+    <!-- Modern Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --bg-deep: #060913;
+            --bg-card: rgba(13, 19, 36, 0.85);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --cyan-glow: #00f2fe;
+            --emerald-glow: #10b981;
+            --purple-glow: #7928ca;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            background-color: #f8f9fa;
-            font-family: Arial, sans-serif;
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px 20px;
             position: relative;
-            min-height: 100vh; /* Ensure full viewport height */
+            overflow-x: hidden;
         }
-        .container {
-            margin-top: 50px;
+
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.35;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glow-1 {
+            top: -100px;
+            right: 15%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #10b981, transparent 70%);
+        }
+
+        .glow-2 {
+            bottom: -100px;
+            left: 15%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #00f2fe, transparent 70%);
+        }
+
+        .card-container {
+            max-width: 540px;
+            width: 100%;
             position: relative;
-            z-index: 1; /* Ensure content is above footer */
+            z-index: 10;
         }
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+
+        .success-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 28px;
+            padding: 45px 36px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 30px rgba(16, 185, 129, 0.15);
+            position: relative;
+            overflow: hidden;
+            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .card-body {
-            padding: 40px;
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(30px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
-        .card-title {
+
+        .success-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #10b981, #00f2fe, #7928ca);
+        }
+
+        .icon-orbit {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.15);
+            border: 2px solid var(--emerald-glow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px auto;
             font-size: 2.5rem;
-            color: #007bff;
+            color: var(--emerald-glow);
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+            animation: pulseIcon 2s ease-in-out infinite;
         }
-        .card-subtitle {
-            font-size: 1.5rem;
-            color: #6c757d;
-            margin-top: 10px;
+
+        @keyframes pulseIcon {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+            50% { transform: scale(1.06); box-shadow: 0 0 35px rgba(16, 185, 129, 0.7); }
         }
-        .start-recognition {
-            display: inline-block;
-            margin-top: 20px;
-            padding: 12px 24px;
-            background-color: #007bff;
-            color: white;
-            border-radius: 5px;
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #6ee7b7;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.25;
+            margin-bottom: 8px;
+        }
+
+        .student-highlight {
+            color: var(--cyan-glow);
+            font-weight: 700;
+        }
+
+        p.desc {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* Fast-track Countdown Card */
+        .fasttrack-box {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px -6px rgba(0, 242, 254, 0.15);
+        }
+
+        .fasttrack-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.88rem;
+            color: #cbd5e1;
+        }
+
+        .fasttrack-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            color: var(--cyan-glow);
+        }
+
+        .timer-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #ffffff;
+            background: rgba(0, 242, 254, 0.2);
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 242, 254, 0.4);
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #10b981, #00f2fe);
+            border-radius: 4px;
+            transition: width 0.05s linear;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.8);
+        }
+
+        .actions-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 15px 24px;
+            background: linear-gradient(135deg, #10b981 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 14px;
+            color: #030712;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
             text-decoration: none;
-            transition: background-color 0.3s;
-        }
-        .start-recognition:hover {
-            background-color: #0056b3;
-        }
-        /* Footer styles */
-        .footer {
-            color: #6c757d;
-            font-size: 24px;
             cursor: pointer;
-            margin-top: 20px;
+            transition: all 0.25s ease;
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
         }
-        .footer i {
-            margin-right: 10px;
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+            color: #030712;
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 13px 24px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.92rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.09);
+            border-color: rgba(0, 242, 254, 0.3);
+            color: var(--cyan-glow);
+            transform: translateY(-2px);
+        }
+
+        .pause-btn {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 0.78rem;
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+        .pause-btn:hover {
+            color: #ffffff;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6">
-                <div class="card">
-                    <div class="card-body text-center">
-                        <h2 class="card-title">Registered Successfully!</h2>
-                        <h3 class="card-subtitle">Please Wait For Admin Approval</h3>
-                        <div class="footer" onclick="location.href='{% url 'home' %}'">
-                            <i class="fas fa-home"></i> Back to Home
-                        </div>
-                    </div>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <div class="card-container">
+        <div class="success-card">
+            <div class="icon-orbit">
+                <i class="fas fa-check"></i>
+            </div>
+
+            <div style="display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap;">
+                <div class="badge-pill">
+                    <i class="fas fa-camera"></i> Face Biometrics Verified
                 </div>
+                {% if fingerprint_id %}
+                <div class="badge-pill" style="border-color: rgba(0, 242, 254, 0.4); background: rgba(0, 242, 254, 0.12); color: #67e8f9;">
+                    <i class="fas fa-fingerprint"></i> Unique Fingerprint: {{ finger_type }} ({{ fingerprint_id }})
+                </div>
+                {% endif %}
+            </div>
+
+            <h1>Registration Complete!</h1>
+            <p class="desc">
+                {% if student_name %}
+                    Welcome, <span class="student-highlight">{{ student_name }}</span>!
+                {% endif %}
+                Your facial AI embeddings and distinct <strong>{{ finger_type|default:"optical fingerprint" }}</strong> have been registered and activated. You can now mark attendance using either Face Recognition or the Optical Fingerprint Scanner.
+            </p>
+
+            <!-- Fast-track to Face Attendance Scanner -->
+            <div class="fasttrack-box" id="fastTrackBox">
+                <div class="fasttrack-header">
+                    <span class="fasttrack-title">
+                        <i class="fas fa-bolt"></i> Fast-Tracking to Biometric Attendance
+                    </span>
+                    <span class="timer-badge" id="countdownBadge">2s</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                    <span style="font-size: 0.75rem; color: #64748b;">Live camera scanner loading...</span>
+                    <button type="button" class="pause-btn" id="pauseBtn" onclick="togglePause()">Pause redirect</button>
+                </div>
+            </div>
+
+            <div class="actions-group">
+                <a href="{% url 'capture_and_recognize' %}{% if student_name %}?new_enrollment=true&name={{ student_name|urlencode }}{% endif %}" class="btn-primary" id="launchScannerBtn">
+                    <i class="fas fa-camera"></i>
+                    <span>Mark Attendance Now (Face Scanner)</span>
+                </a>
+                <a href="{% url 'login' %}?tab=student" class="btn-secondary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Sign In to Student Portal</span>
+                </a>
+                <a href="{% url 'home' %}" class="btn-secondary">
+                    <i class="fas fa-home"></i>
+                    <span>Return to Dashboard</span>
+                </a>
             </div>
         </div>
     </div>
-    
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        const targetUrl = "{% url 'capture_and_recognize' %}{% if student_name %}?new_enrollment=true&name={{ student_name|urlencode }}{% endif %}";
+        const duration = 2200; // 2.2 seconds for smooth animation
+        let startTime = Date.now();
+        let isPaused = false;
+        let animFrame;
+
+        const progressBar = document.getElementById('progressBar');
+        const countdownBadge = document.getElementById('countdownBadge');
+        const pauseBtn = document.getElementById('pauseBtn');
+
+        function updateProgress() {
+            if (isPaused) return;
+            const elapsed = Date.now() - startTime;
+            const progress = Math.min(100, (elapsed / duration) * 100);
+            progressBar.style.width = progress + '%';
+
+            const remainingSeconds = Math.max(0, ((duration - elapsed) / 1000)).toFixed(1);
+            countdownBadge.textContent = remainingSeconds + 's';
+
+            if (elapsed >= duration) {
+                window.location.href = targetUrl;
+            } else {
+                animFrame = requestAnimationFrame(updateProgress);
+            }
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            if (isPaused) {
+                cancelAnimationFrame(animFrame);
+                pauseBtn.textContent = 'Resume auto-launch';
+                countdownBadge.textContent = 'Paused';
+            } else {
+                startTime = Date.now() - (parseFloat(progressBar.style.width || 0) / 100 * duration);
+                pauseBtn.textContent = 'Pause redirect';
+                animFrame = requestAnimationFrame(updateProgress);
+            }
+        }
+
+        // Start countdown on page load
+        animFrame = requestAnimationFrame(updateProgress);
+    </script>
 </body>
 </html>

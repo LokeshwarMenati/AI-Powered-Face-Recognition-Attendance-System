@@ -7,6 +7,9 @@ class Student(models.Model):
     phone_number = models.CharField(max_length=15)
     student_class = models.CharField(max_length=100)
     image = models.ImageField(upload_to='students/')
+    fingerprint_id = models.CharField(max_length=255, unique=True, null=True, blank=True, help_text="Unique biometric fingerprint ID / hash")
+    finger_type = models.CharField(max_length=50, default='Right Index', blank=True, help_text="Designation of scanned finger (e.g., Right Index, Right Thumb)")
+    fingerprint_data = models.TextField(null=True, blank=True, help_text="Biometric ridge minutiae pattern data")
     authorized = models.BooleanField(default=False)
 
     def __str__(self):

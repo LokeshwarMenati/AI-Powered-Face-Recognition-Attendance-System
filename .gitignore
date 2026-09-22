@@ -44,3 +44,4 @@ Thumbs.db
 # Vercel & Tooling
 .vercel/
 .qodo/
+.snapshots/

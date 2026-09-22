@@ -3,73 +3,603 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Details</title>
-    <!-- Include any necessary CSS -->
+    <title>Student Profile: {{ student.name }} | AI Attendance System</title>
+    <!-- Modern Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Global Styles */
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background-color: #f9f9f9;
+        :root {
+            --bg-deep: #060913;
+            --bg-card: rgba(13, 19, 36, 0.85);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --cyan-glow: #00f2fe;
+            --blue-accent: #4facfe;
+            --purple-accent: #7928ca;
+            --emerald-glow: #10b981;
+            --rose-glow: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 30px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Cyber-Grid Matrix Background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0, 242, 254, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 254, 0.035) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+            mask-image: radial-gradient(ellipse at 50% 40%, rgba(0, 0, 0, 0.9) 30%, transparent 85%);
+            -webkit-mask-image: radial-gradient(ellipse at 50% 40%, rgba(0, 0, 0, 0.9) 30%, transparent 85%);
+            animation: gridFlow 28s linear infinite;
+        }
+
+        @keyframes gridFlow {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(130px);
+            opacity: 0.32;
+            pointer-events: none;
+            z-index: 0;
+            animation: pulseGlow 14s ease-in-out infinite alternate;
+        }
+        .glow-1 {
+            top: -120px;
+            right: 15%;
+            width: 580px;
+            height: 580px;
+            background: radial-gradient(circle, #00f2fe, #4facfe, transparent 75%);
+        }
+        .glow-2 {
+            bottom: -150px;
+            left: 10%;
+            width: 650px;
+            height: 650px;
+            background: radial-gradient(circle, #7928ca, #3b82f6, transparent 75%);
+            animation-delay: -7s;
+        }
+
+        @keyframes pulseGlow {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.12) translate(25px, -20px); }
+            100% { transform: scale(0.92) translate(-25px, 20px); }
+        }
+
         .container {
-            max-width: 600px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: box-shadow 0.3s ease;
+            max-width: 650px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
         }
-        h1 {
-            text-align: center;
-            color: #007bff;
-            margin-bottom: 20px;
-        }
-        .student-details {
-            border-top: 1px solid #eee;
-            padding-top: 20px;
-            margin-bottom: 30px;
-        }
-        .detail {
-            margin-bottom: 10px;
-            color: #555;
-        }
-        .actions {
-            margin-top: 20px;
-            text-align: center;
-        }
-        .actions a {
-            display: inline-block;
-            margin: 0 10px;
-            padding: 12px 24px;
-            background-color: #007bff;
-            color: #fff;
-            border-radius: 5px;
+
+        .btn-back-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
             text-decoration: none;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 0.88rem;
+            padding: 8px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 30px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
         }
-        .actions a:hover {
-            background-color: #0056b3;
+
+        .btn-back-nav:hover {
+            color: var(--cyan-glow);
+            border-color: rgba(0, 242, 254, 0.3);
+            transform: translateX(-3px);
+        }
+
+        .profile-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 36px 32px;
+            box-shadow: 
+                0 0 0 1px rgba(0, 242, 254, 0.1),
+                0 25px 60px -10px rgba(0, 0, 0, 0.8);
+            animation: cardEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .avatar-wrap {
+            text-align: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .student-photo {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--cyan-glow);
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.35);
+        }
+
+        .student-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .student-header h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .student-header span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.82rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--cyan-glow);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .info-cell {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 14px 18px;
+        }
+
+        .info-cell .title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .info-cell .data {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .button-bar {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-auth-act {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            color: #060913;
+            font-weight: 700;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-auth-act:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 242, 254, 0.5);
+        }
+
+        .btn-del-act {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px 20px;
+            background: rgba(244, 63, 94, 0.12);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+            color: #fda4af;
+            font-weight: 600;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-del-act:hover {
+            background: rgba(244, 63, 94, 0.25);
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .btn-enroll-detail {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 13px 20px;
+            background: rgba(0, 242, 254, 0.12);
+            border: 1.5px solid rgba(0, 242, 254, 0.35);
+            color: var(--cyan-glow);
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-size: 0.92rem;
+        }
+
+        .btn-enroll-detail:hover {
+            background: rgba(0, 242, 254, 0.22);
+            border-color: var(--cyan-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 242, 254, 0.4);
+        }
+
+        /* Enrollment Modal */
+        .fp-modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(3, 7, 18, 0.82);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .fp-modal-card {
+            background: rgba(13, 20, 39, 0.96);
+            border: 1.5px solid rgba(0, 242, 254, 0.3);
+            border-radius: 22px;
+            width: 100%;
+            max-width: 480px;
+            padding: 26px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 242, 254, 0.2);
+            animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .fp-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 7px 14px;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.82rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .fp-chip.active {
+            background: rgba(0, 242, 254, 0.18);
+            border-color: var(--cyan-glow);
+            color: var(--cyan-glow);
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
     <div class="container">
-        <h1>Student Details</h1>
-        <div class="student-details">
-            <div class="detail"><strong>Name:</strong> {{ student.name }}</div>
-            <div class="detail"><strong>Email:</strong> {{ student.email }}</div>
-            <div class="detail"><strong>Phone Number:</strong> {{ student.phone_number }}</div>
-            <div class="detail"><strong>Class:</strong> {{ student.student_class }}</div>
-            <div class="detail"><strong>Authorized:</strong> {% if student.authorized %} Yes {% else %} No {% endif %}</div>
-        </div>
-        <div class="actions">
-            <a href="{% url 'student-list' %}">Back to List</a>
-            <a href="{% url 'student-authorize' pk=student.pk %}">Authorize</a>
-            <a href="{% url 'student-delete' pk=student.pk %}">Delete</a> <!-- Add this line -->
+        <a href="{% url 'student-list' %}" class="btn-back-nav">
+            <i class="fas fa-arrow-left"></i>
+            <span>Return to Roster</span>
+        </a>
+
+        <div class="profile-card">
+            <div class="avatar-wrap">
+                {% if student.image %}
+                    <img src="{{ student.image.url }}" alt="{{ student.name }}" class="student-photo">
+                {% else %}
+                    <div class="student-photo" style="display: flex; align-items: center; justify-content: center; margin: 0 auto; background: #1e293b;">
+                        <i class="fas fa-user" style="font-size: 3rem; color: #64748b;"></i>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="student-header">
+                <h2>{{ student.name }}</h2>
+                <span>ID: #STU-{{ student.pk }}</span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-cell">
+                    <div class="title">Email Address</div>
+                    <div class="data">{{ student.email|default:"No email registered" }}</div>
+                </div>
+                <div class="info-cell">
+                    <div class="title">Contact Number</div>
+                    <div class="data" style="font-family: 'JetBrains Mono', monospace;">{{ student.phone_number }}</div>
+                </div>
+                <div class="info-cell">
+                    <div class="title">Enrolled Class</div>
+                    <div class="data">{{ student.student_class }}</div>
+                </div>
+                <div class="info-cell">
+                    <div class="title">Attendance Authorization</div>
+                    <div class="data" style="color: {% if student.authorized %}var(--emerald-glow){% else %}var(--rose-glow){% endif %};">
+                        {% if student.authorized %}● Active & Authorized{% else %}○ Unauthorized{% endif %}
+                    </div>
+                </div>
+                <div class="info-cell" style="grid-column: span 2;">
+                    <div class="title"><i class="fas fa-fingerprint me-1"></i> Unique Biometric Fingerprint</div>
+                    <div class="data" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                        <span id="detailFpText">
+                            {% if student.fingerprint_id and not student.fingerprint_id|slice:":3" == "FP-" %}
+                                <strong style="color: var(--cyan-glow);">{{ student.finger_type|default:"Laptop Sensor Print" }}</strong>
+                                <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; color: #94a3b8; margin-left: 8px;">[Hardware Authenticated]</span>
+                            {% elif student.fingerprint_id %}
+                                <strong style="color: var(--amber-glow);">{{ student.finger_type|default:"Legacy Hash" }}</strong>
+                                <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; color: #94a3b8; margin-left: 8px;">(Touch sensor below to enroll physical print)</span>
+                            {% else %}
+                                <span style="color: var(--text-muted); font-size: 0.88rem;">No fingerprint registered yet</span>
+                            {% endif %}
+                        </span>
+                        <span id="detailFpBadge" style="font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; padding: 3px 10px; border-radius: 12px; background: {% if student.fingerprint_id and not student.fingerprint_id|slice:":3" == "FP-" %}rgba(16, 185, 129, 0.15); color: var(--emerald-glow); border: 1px solid rgba(16, 185, 129, 0.3);{% else %}rgba(245, 158, 11, 0.15); color: var(--amber-glow); border: 1px solid rgba(245, 158, 11, 0.3);{% endif %}">
+                            {% if student.fingerprint_id and not student.fingerprint_id|slice:":3" == "FP-" %}HARDWARE ENROLLED{% else %}PENDING HARDWARE SCAN{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button-bar" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button type="button" class="btn-enroll-detail" onclick="openStudentDetailFpModal()">
+                    <i class="fas fa-fingerprint"></i>
+                    <span>Enroll / Update Laptop Fingerprint</span>
+                </button>
+                <a href="{% url 'student-authorize' pk=student.pk %}" class="btn-auth-act">
+                    <i class="fas fa-key"></i>
+                    <span>Modify Authorization</span>
+                </a>
+                <a href="{% url 'student-delete' pk=student.pk %}" class="btn-del-act">
+                    <i class="fas fa-trash"></i>
+                    <span>Delete</span>
+                </a>
+            </div>
         </div>
     </div>
+
+    <!-- Modal for Enrolling Physical Laptop Fingerprint for this Student -->
+    <div id="detailFpModal" class="fp-modal-backdrop" style="display: none;">
+        <div class="fp-modal-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);">
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: #ffffff; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-fingerprint" style="color: var(--cyan-glow);"></i> Enroll Fingerprint for {{ student.name }}
+                </h3>
+                <button type="button" onclick="closeStudentDetailFpModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.6rem; cursor: pointer;">&times;</button>
+            </div>
+            <div>
+                <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 16px; line-height: 1.5;">
+                    Select the finger you wish to enroll, then click the button below and touch your laptop's physical fingerprint reader (Windows Hello).
+                </p>
+                <label style="font-size: 0.82rem; color: #cbd5e1; font-weight: 600; margin-bottom: 8px; display: block;">Select Finger Type:</label>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                    <button type="button" class="fp-chip active" onclick="selectDetailFinger(this, 'Right Index')">Right Index</button>
+                    <button type="button" class="fp-chip" onclick="selectDetailFinger(this, 'Right Thumb')">Right Thumb</button>
+                    <button type="button" class="fp-chip" onclick="selectDetailFinger(this, 'Left Index')">Left Index</button>
+                    <button type="button" class="fp-chip" onclick="selectDetailFinger(this, 'Left Thumb')">Left Thumb</button>
+                </div>
+                <div id="detailModalStatus" style="display: none; padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 14px;"></div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 14px; border-top: 1px solid var(--border-subtle);">
+                <button type="button" onclick="closeStudentDetailFpModal()" style="background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 10px 18px; color: var(--text-muted); cursor: pointer;">Cancel</button>
+                <button type="button" id="btnConfirmDetailEnroll" onclick="performDetailEnrollFingerprint()" style="background: linear-gradient(135deg, #00f2fe, #4facfe); border: none; border-radius: 10px; padding: 10px 20px; color: #060913; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-hand-point-up me-2"></i> Touch Laptop Sensor to Enroll
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-switch 127.0.0.1 to localhost for WebAuthn platform authenticator compatibility
+        if (window.location.hostname === '127.0.0.1') {
+            window.location.replace(window.location.href.replace('127.0.0.1', 'localhost'));
+        }
+
+        let selectedDetailFinger = 'Right Index';
+
+        function openStudentDetailFpModal() {
+            document.getElementById('detailFpModal').style.display = 'flex';
+            document.getElementById('detailModalStatus').style.display = 'none';
+            const btn = document.getElementById('btnConfirmDetailEnroll');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-hand-point-up me-2"></i> Touch Laptop Sensor to Enroll';
+        }
+
+        function closeStudentDetailFpModal() {
+            document.getElementById('detailFpModal').style.display = 'none';
+        }
+
+        function selectDetailFinger(btn, fingerName) {
+            selectedDetailFinger = fingerName;
+            document.querySelectorAll('#detailFpModal .fp-chip').forEach(c => c.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+        }
+
+        function base64UrlToUint8Array(base64Url) {
+            const padding = '='.repeat((4 - (base64Url.length % 4)) % 4);
+            const base64 = (base64Url + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function performDetailEnrollFingerprint() {
+            const status = document.getElementById('detailModalStatus');
+            const btn = document.getElementById('btnConfirmDetailEnroll');
+
+            if (!window.PublicKeyCredential) {
+                status.style.display = 'block';
+                status.style.background = 'rgba(244, 63, 94, 0.15)';
+                status.style.border = '1px solid rgba(244, 63, 94, 0.3)';
+                status.style.color = '#fda4af';
+                status.textContent = 'WebAuthn / Laptop fingerprint reader is not supported on this browser.';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Touch Laptop Fingerprint Reader...';
+            status.style.display = 'block';
+            status.style.background = 'rgba(0, 242, 254, 0.15)';
+            status.style.border = '1px solid rgba(0, 242, 254, 0.3)';
+            status.style.color = 'var(--cyan-glow)';
+            status.textContent = 'Windows Hello prompt active: Please place your finger on the sensor...';
+
+            try {
+                const chResp = await fetch(`/api/webauthn/register-challenge/?student_id={{ student.id }}`);
+                const chData = await chResp.json();
+
+                if (!chData.success) {
+                    throw new Error(chData.message || 'Could not initiate enrollment challenge.');
+                }
+
+                const challengeBytes = base64UrlToUint8Array(chData.challenge);
+                const userIdBytes = base64UrlToUint8Array(chData.user.id);
+
+                const cred = await navigator.credentials.create({
+                    publicKey: {
+                        challenge: challengeBytes,
+                        rp: {
+                            name: chData.rp.name,
+                            id: chData.rp.id
+                        },
+                        user: {
+                            id: userIdBytes,
+                            name: chData.user.name,
+                            displayName: chData.user.displayName
+                        },
+                        pubKeyCredParams: [
+                            { alg: -7, type: 'public-key' },
+                            { alg: -257, type: 'public-key' }
+                        ],
+                        authenticatorSelection: {
+                            authenticatorAttachment: 'platform',
+                            userVerification: 'required'
+                        },
+                        timeout: 60000
+                    }
+                });
+
+                if (!cred || !cred.id) {
+                    throw new Error('No biometric credential captured from laptop sensor.');
+                }
+
+                const formData = new FormData();
+                formData.append('student_id', '{{ student.id }}');
+                formData.append('credential_id', cred.id);
+                formData.append('finger_type', selectedDetailFinger);
+
+                const csrftoken = getCookie('csrftoken');
+                const saveResp = await fetch('/api/webauthn/register-verify/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: csrftoken ? { 'X-CSRFToken': csrftoken } : {}
+                });
+                const saveData = await saveResp.json();
+
+                if (saveData.success) {
+                    status.style.background = 'rgba(16, 185, 129, 0.15)';
+                    status.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+                    status.style.color = '#6ee7b7';
+                    status.textContent = saveData.message;
+                    btn.innerHTML = '<i class="fas fa-check me-2"></i> Fingerprint Registered!';
+
+                    document.getElementById('detailFpText').innerHTML = `<strong style="color: var(--cyan-glow);">${selectedDetailFinger}</strong> <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; color: #94a3b8; margin-left: 8px;">[Hardware Authenticated]</span>`;
+                    const badge = document.getElementById('detailFpBadge');
+                    badge.textContent = 'HARDWARE ENROLLED';
+                    badge.style.background = 'rgba(16, 185, 129, 0.15)';
+                    badge.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                    badge.style.color = 'var(--emerald-glow)';
+
+                    setTimeout(() => closeStudentDetailFpModal(), 1800);
+                } else {
+                    throw new Error(saveData.message || 'Enrollment failed.');
+                }
+            } catch (err) {
+                console.error(err);
+                let msg = err.message || 'Sensor enrollment was cancelled.';
+                if (err.name === 'NotAllowedError') {
+                    msg = 'Sensor touch was cancelled or timed out. No finger placed.';
+                }
+                status.style.background = 'rgba(244, 63, 94, 0.15)';
+                status.style.border = '1px solid rgba(244, 63, 94, 0.3)';
+                status.style.color = '#fda4af';
+                status.textContent = msg;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-hand-point-up me-2"></i> Try Touching Sensor Again';
+            }
+        }
+    </script>
 </body>
 </html>

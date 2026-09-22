@@ -3,136 +3,322 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student List</title>
-    <!-- Include any necessary CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>Manage Students | AI Attendance System</title>
+    <!-- Modern Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Global Styles */
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background-color: #f9f9f9;
+        :root {
+            --bg-deep: #060913;
+            --bg-card: rgba(13, 19, 36, 0.85);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --cyan-glow: #00f2fe;
+            --blue-accent: #4facfe;
+            --purple-accent: #7928ca;
+            --emerald-glow: #10b981;
+            --rose-glow: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 30px 20px;
             position: relative;
-            min-height: 100vh; /* Ensure full viewport height */
+            overflow-x: hidden;
         }
+
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.28;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .glow-1 {
+            top: -100px;
+            right: 15%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #00f2fe, #4facfe, transparent 75%);
+        }
+        .glow-2 {
+            bottom: -150px;
+            left: 10%;
+            width: 650px;
+            height: 650px;
+            background: radial-gradient(circle, #7928ca, #3b82f6, transparent 75%);
+        }
+
         .container {
-            width: 100%;
-            max-width: 800px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: box-shadow 0.3s ease;
-            box-sizing: border-box;
-            position: relative; /* Ensure z-index works */
-            z-index: 1; /* Ensure content is above footer */
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
         }
-        h1 {
-            text-align: center;
-            color: #007bff;
-            margin-bottom: 20px;
+
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
         }
+
+        .btn-back-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            padding: 8px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back-nav:hover {
+            color: var(--cyan-glow);
+            border-color: rgba(0, 242, 254, 0.3);
+            transform: translateX(-3px);
+        }
+
+        .btn-enroll-new {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 20px;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            color: #060913;
+            font-size: 0.88rem;
+            font-weight: 700;
+            border-radius: 30px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+        }
+
+        .btn-enroll-new:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 242, 254, 0.5);
+        }
+
+        .page-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 
+                0 0 0 1px rgba(0, 242, 254, 0.1),
+                0 25px 60px -10px rgba(0, 0, 0, 0.8);
+            animation: cardEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-section {
+            margin-bottom: 26px;
+        }
+
+        .header-section h2 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .header-section p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid var(--border-subtle);
+            background: rgba(10, 15, 30, 0.4);
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 12px;
             text-align: left;
         }
-        th {
-            background-color: #007bff;
-            color: #fff;
-        }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-        tr:hover {
-            background-color: #e9ecef;
-        }
-        .actions a {
-            display: inline-block;
-            margin-right: 5px;
-            padding: 8px 16px;
-            text-decoration: none;
-            color: #007bff;
-            border: 1px solid #007bff;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .actions a:hover {
-            background-color: #007bff;
-            color: #fff;
-        }
-        /* Footer styles */
-        .footer {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            color: #6c757d;
-            font-size: 24px;
-            cursor: pointer;
-        }
-        .footer i {
-            margin-right: 10px;
+
+        thead {
+            background: rgba(15, 23, 42, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Responsive Styles */
-        @media only screen and (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-            table {
-                font-size: 14px;
-            }
-            th, td {
-                padding: 10px;
-            }
-            .actions a {
-                padding: 6px 12px;
-            }
+        th {
+            padding: 16px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--cyan-glow);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        td {
+            padding: 16px;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 242, 254, 0.04);
+        }
+
+        .badge-auth {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .auth-yes {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--emerald-glow);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .auth-no {
+            background: rgba(244, 63, 94, 0.12);
+            color: var(--rose-glow);
+            border: 1px solid rgba(244, 63, 94, 0.3);
+        }
+
+        .btn-action-view {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            color: var(--cyan-glow);
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-action-view:hover {
+            background: var(--cyan-glow);
+            color: #060913;
+            transform: translateY(-1px);
         }
     </style>
 </head>
 <body>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
     <div class="container">
-        <h1>Student List</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Phone Number</th>
-                    <th>Class</th>
-                    <th>Authorized</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for student in students %}
-                <tr>
-                    <td>{{ student.name }}</td>
-                    <td>{{ student.email }}</td>
-                    <td>{{ student.phone_number }}</td>
-                    <td>{{ student.student_class }}</td>
-                    <td>{% if student.authorized %} Yes {% else %} No {% endif %}</td>
-                    <td class="actions">
-                        <a href="{% url 'student-authorize' pk=student.pk %}">View</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <!-- Back to home icon -->
-    <div class="footer" onclick="location.href='{% url 'home' %}'">
-        <i class="fas fa-home"></i> Back to Home
+        <div class="top-nav">
+            <a href="{% url 'home' %}" class="btn-back-nav">
+                <i class="fas fa-arrow-left"></i>
+                <span>Return to Dashboard</span>
+            </a>
+            <a href="{% url 'capture_student' %}" class="btn-enroll-new">
+                <i class="fas fa-user-plus"></i>
+                <span>Register Student</span>
+            </a>
+        </div>
+
+        <div class="page-card">
+            <div class="header-section">
+                <h2>Student Roster & Verification</h2>
+                <p>Manage student profile permissions and verify facial biometric authorization</p>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Class</th>
+                            <th>Email Address</th>
+                            <th>Biometric Fingerprint</th>
+                            <th>Authorization</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if students %}
+                            {% for student in students %}
+                            <tr>
+                                <td style="font-weight: 600; color: #ffffff;">{{ student.name }}</td>
+                                <td><span style="padding: 2px 8px; background: rgba(255,255,255,0.06); border-radius: 6px;">{{ student.student_class }}</span></td>
+                                <td>{{ student.email }}</td>
+                                <td>
+                                    {% if student.fingerprint_id %}
+                                        <span class="badge-auth" style="background: rgba(0, 242, 254, 0.1); color: var(--cyan-glow); border: 1px solid rgba(0, 242, 254, 0.3);">
+                                            <i class="fas fa-fingerprint"></i> {{ student.finger_type|default:"Enrolled" }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-auth" style="background: rgba(255, 255, 255, 0.05); color: var(--text-muted); border: 1px solid rgba(255, 255, 255, 0.1);">
+                                            <i class="fas fa-minus"></i> None
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if student.authorized %}
+                                        <span class="badge-auth auth-yes"><i class="fas fa-check-circle"></i> Authorized</span>
+                                    {% else %}
+                                        <span class="badge-auth auth-no"><i class="fas fa-circle-xmark"></i> Pending Auth</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'student-detail' pk=student.pk %}" class="btn-action-view">
+                                        <i class="fas fa-id-card"></i> Profile
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
+                                    <i class="fas fa-user-slash" style="font-size: 2.5rem; margin-bottom: 12px; opacity: 0.5;"></i>
+                                    <p>No registered students found.</p>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </body>
 </html>

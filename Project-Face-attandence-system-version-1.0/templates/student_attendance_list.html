@@ -3,151 +3,412 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Student Attendance List</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"> <!-- Font Awesome -->
+    <title>Attendance Telemetry Logs | AI Attendance System</title>
+    <!-- Modern Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body, html {
+        :root {
+            --bg-deep: #060913;
+            --bg-card: rgba(13, 19, 36, 0.85);
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --cyan-glow: #00f2fe;
+            --blue-accent: #4facfe;
+            --purple-accent: #7928ca;
+            --emerald-glow: #10b981;
+            --amber-glow: #f59e0b;
+            --rose-glow: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            color: #343a40;
         }
-        .container {
-            padding: 20px;
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            padding: 30px 20px;
+            position: relative;
+            overflow-x: hidden;
         }
-        .table-responsive {
-            margin-top: 20px;
-            flex-grow: 1;
+
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.28;
+            pointer-events: none;
+            z-index: 0;
         }
-        .table thead th {
-            vertical-align: middle;
-            text-align: center;
-            background-color: #007bff;
-            color: white;
+        .glow-1 {
+            top: -100px;
+            left: 15%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #00f2fe, #4facfe, transparent 75%);
         }
-        .table tbody tr:hover {
-            background-color: #e9ecef;
+        .glow-2 {
+            bottom: -150px;
+            right: 10%;
+            width: 650px;
+            height: 650px;
+            background: radial-gradient(circle, #7928ca, #3b82f6, transparent 75%);
         }
-        .table td, .table th {
-            vertical-align: middle;
-            text-align: center;
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
         }
-        .heading {
-            text-align: center;
-            margin: 40px 0;
-            color: #007bff;
-        }
-        .footer {
-            margin-top: auto;
-            padding: 10px 0;
-            text-align: left;
-        }
-        .back-icon {
-            padding: 10px;
-            font-size: 1.5em;
-            color: #007bff;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-        .back-icon:hover {
-            color: #0056b3;
-        }
-        .form-inline .form-control {
-            width: auto;
-            flex: 1 1 auto;
-        }
-        .filter-container {
+
+        .top-nav {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
+            align-items: center;
+            margin-bottom: 24px;
         }
-        .filter-container .input-group {
+
+        .btn-back-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.88rem;
+            padding: 8px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-back-nav:hover {
+            color: var(--cyan-glow);
+            border-color: rgba(0, 242, 254, 0.3);
+            transform: translateX(-3px);
+        }
+
+        .page-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 
+                0 0 0 1px rgba(0, 242, 254, 0.1),
+                0 25px 60px -10px rgba(0, 0, 0, 0.8);
+            animation: cardEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: translateY(25px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-section {
+            margin-bottom: 26px;
+        }
+
+        .header-section h2 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .header-section p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+        }
+
+        /* Filter Controls Form */
+        .filter-container {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
             flex: 1;
-            margin-right: 10px;
+            min-width: 260px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
         }
-        .filter-container .input-group:last-child {
-            margin-right: 0;
+
+        .input-group:focus-within {
+            border-color: var(--cyan-glow);
+            box-shadow: 0 0 0 3px rgba(0, 242, 254, 0.15);
         }
-        .btn-custom {
-            background-color: #007bff;
-            color: white;
+
+        .form-control {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.92rem;
+            padding: 12px 16px;
+            outline: none;
         }
-        .btn-custom:hover {
-            background-color: #0056b3;
+
+        .form-control::placeholder {
+            color: #475569;
+        }
+
+        .btn-filter {
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            border: none;
+            color: #060913;
+            font-weight: 700;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-filter:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Modern Dark Styled Table */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid var(--border-subtle);
+            background: rgba(10, 15, 30, 0.4);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        thead {
+            background: rgba(15, 23, 42, 0.85);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            padding: 16px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--cyan-glow);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        td {
+            padding: 14px 16px;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+        }
+
+        tbody tr {
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(0, 242, 254, 0.04);
+        }
+
+        .student-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(0, 242, 254, 0.4);
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.2);
+        }
+
+        .student-name-cell {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .time-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .time-in {
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--emerald-glow);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .time-out {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--amber-glow);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+        }
+
+        .duration-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            background: rgba(121, 40, 202, 0.15);
+            color: #c084fc;
+            border: 1px solid rgba(121, 40, 202, 0.3);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .no-records {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+
+        .no-records i {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            opacity: 0.5;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <h2 class="heading">Student Attendance Records</h2>
-    <form method="get" class="filter-container">
-        <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Search for students..." value="{{ search_query }}">
-            <div class="input-group-append">
-                <button class="btn btn-custom" type="submit"><i class="fas fa-search"></i> Search</button>
-            </div>
-        </div>
-        <div class="input-group">
-            <input type="date" name="attendance_date" class="form-control" value="{{ date_filter }}">
-            <div class="input-group-append">
-                <button class="btn btn-custom" type="submit"><i class="fas fa-calendar-alt"></i> Filter</button>
-            </div>
-        </div>
-    </form>
-    
-    <!-- Attendance Table -->
-    <div class="table-responsive attendance-table">
-        <table class="table table-bordered table-hover">
-            <thead>
-                <tr>
-                    <th>Student Image</th>
-                    <th>Student Name</th>
-                    <th>Attendance Date</th>
-                    <th>Check-in Time</th>
-                    <th>Check-out Time</th>
-                    <th>Stayed Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for data in student_attendance_data %}
-                    {% for attendance in data.attendance_records %}
-                    <tr>
-                        <td>
-                            {% if data.student.image %}
-                                <img src="{{ data.student.image.url }}" alt="{{ data.student.name }}" style="width: 50px; height: 50px; border-radius: 50%;">
-                            {% else %}
-                                No Image
-                            {% endif %}
-                        </td>
-                        <td>{{ data.student.name }}</td>
-                        <td>{{ attendance.date }}</td>
-                        <td>{{ attendance.check_in_time|date:"h:i:s A" }}</td>
-                        <td>{{ attendance.check_out_time|date:"h:i:s A" }}</td>
-                        <td>
-                            {% if attendance.check_in_time and attendance.check_out_time %}
-                                {{ attendance.calculate_duration }}
-                            {% else %}
-                                Not Checked Out
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
 
-    <div class="footer">
-        <i class="fas fa-arrow-left back-icon" onclick="location.href='/'"></i> <!-- Font Awesome back icon -->
+    <div class="container">
+        <div class="top-nav">
+            <a href="{% url 'home' %}" class="btn-back-nav">
+                <i class="fas fa-arrow-left"></i>
+                <span>Return to Dashboard</span>
+            </a>
+        </div>
+
+        <div class="page-card">
+            <div class="header-section">
+                <h2>Attendance Telemetry Records</h2>
+                <p>Detailed verification records, timestamps, and active duration logs</p>
+            </div>
+
+            <!-- Search and Date Filter Form -->
+            <form method="get" class="filter-container">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Search student by name..." value="{{ search_query }}">
+                    <button class="btn-filter" type="submit">
+                        <i class="fas fa-search"></i>
+                        <span>Search</span>
+                    </button>
+                </div>
+                <div class="input-group">
+                    <input type="date" name="attendance_date" class="form-control" value="{{ date_filter }}">
+                    <button class="btn-filter" type="submit">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Filter Date</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Table of Attendance Records -->
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student Image</th>
+                            <th>Student Name</th>
+                            <th>Date</th>
+                            <th>Check-in Time</th>
+                            <th>Check-out Time</th>
+                            <th>Session Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if student_attendance_data %}
+                            {% for data in student_attendance_data %}
+                                {% for attendance in data.attendance_records %}
+                                <tr>
+                                    <td>
+                                        {% if data.student.image %}
+                                            <img src="{{ data.student.image.url }}" alt="{{ data.student.name }}" class="student-avatar">
+                                        {% else %}
+                                            <div class="student-avatar" style="display: flex; align-items: center; justify-content: center; background: #1e293b;">
+                                                <i class="fas fa-user" style="color: #64748b;"></i>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td class="student-name-cell">{{ data.student.name }}</td>
+                                    <td style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;">{{ attendance.date }}</td>
+                                    <td>
+                                        {% if attendance.check_in_time %}
+                                            <span class="time-pill time-in">
+                                                <i class="fas fa-arrow-down"></i>
+                                                {{ attendance.check_in_time|date:"h:i:s A" }}
+                                            </span>
+                                        {% else %}
+                                            <span style="color: #64748b;">--</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if attendance.check_out_time %}
+                                            <span class="time-pill time-out">
+                                                <i class="fas fa-arrow-up"></i>
+                                                {{ attendance.check_out_time|date:"h:i:s A" }}
+                                            </span>
+                                        {% else %}
+                                            <span style="color: #64748b; font-size: 0.8rem;">Active Session</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if attendance.check_in_time and attendance.check_out_time %}
+                                            <span class="duration-pill">
+                                                <i class="fas fa-stopwatch"></i>
+                                                {{ attendance.calculate_duration }}
+                                            </span>
+                                        {% else %}
+                                            <span style="color: #64748b; font-size: 0.8rem;">In Progress</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="no-records">
+                                    <i class="fas fa-clipboard-question"></i>
+                                    <p>No attendance records match your search criteria.</p>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-</div>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -3,106 +3,2124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>Biometric Admin Authentication | AI Attendance System</title>
+    <!-- Modern Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212; /* Dark background */
+        :root {
+            --bg-deep: #060913;
+            --bg-card: rgba(13, 19, 36, 0.72);
+            --border-glow: rgba(0, 242, 254, 0.28);
+            --cyan-glow: #00f2fe;
+            --blue-accent: #4facfe;
+            --purple-glow: #7928ca;
+            --emerald-glow: #10b981;
+            --danger-glow: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            padding: 20px;
         }
-        .login-container {
-            background-color: #fff;
-            padding: 30px;
+
+        /* Subtle Cyber Grid Matrix Background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0, 242, 254, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 242, 254, 0.035) 1px, transparent 1px);
+            background-size: 52px 52px;
+            pointer-events: none;
+            z-index: 0;
+            mask-image: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.85) 30%, transparent 85%);
+            -webkit-mask-image: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.85) 30%, transparent 85%);
+            animation: gridFlow 30s linear infinite;
+        }
+
+        @keyframes gridFlow {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(52px); }
+        }
+
+        /* Dynamic Canvas Particle Background */
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Ambient Glowing Nebula Blobs */
+        .ambient-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.35;
+            z-index: 0;
+            pointer-events: none;
+            animation: floatGlow 14s ease-in-out infinite alternate;
+        }
+        .glow-1 {
+            top: -10%;
+            left: -10%;
+            width: 550px;
+            height: 550px;
+            background: radial-gradient(circle, #00f2fe 0%, #4facfe 50%, transparent 80%);
+        }
+        .glow-2 {
+            bottom: -15%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #7928ca 0%, #4338ca 60%, transparent 80%);
+            animation-delay: -7s;
+        }
+
+        @keyframes floatGlow {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(40px, -30px) scale(1.1); }
+            100% { transform: translate(-30px, 40px) scale(0.95); }
+        }
+
+        /* Main Glassmorphism Card */
+        .login-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 440px;
+            animation: cardEntrance 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardEntrance {
+            0% {
+                opacity: 0;
+                transform: translateY(35px) scale(0.96);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px 32px;
+            box-shadow: 
+                0 0 0 1px rgba(0, 242, 254, 0.12),
+                0 20px 50px -10px rgba(0, 0, 0, 0.7),
+                0 0 35px -5px rgba(0, 242, 254, 0.18);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.4s ease;
+        }
+
+        .login-card:hover {
+            box-shadow: 
+                0 0 0 1px rgba(0, 242, 254, 0.28),
+                0 25px 60px -10px rgba(0, 0, 0, 0.8),
+                0 0 45px -5px rgba(0, 242, 254, 0.25);
+        }
+
+        /* Top Cyber Accent Line */
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #00f2fe, #7928ca, transparent);
+            animation: scanLineH 4s linear infinite;
+        }
+
+        @keyframes scanLineH {
+            0% { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+        }
+
+        /* Back to Dashboard Navigation Link */
+        .nav-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .nav-back i {
+            transition: transform 0.3s ease;
+        }
+
+        .nav-back:hover {
+            color: var(--cyan-glow);
+            background: rgba(0, 242, 254, 0.08);
+            border-color: rgba(0, 242, 254, 0.25);
+            transform: translateX(-3px);
+        }
+
+        .nav-back:hover i {
+            transform: translateX(-4px);
+        }
+
+        /* Portal Switcher Tabs */
+        .portal-switcher {
+            display: flex;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 4px;
+            margin-bottom: 24px;
+            gap: 4px;
+        }
+
+        .portal-tab-btn {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 9px 8px;
+            border-radius: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .portal-tab-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .portal-tab-btn.active {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(79, 172, 254, 0.25) 100%);
+            border: 1px solid rgba(0, 242, 254, 0.45);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.2);
+        }
+
+        .portal-tab-btn.tab-admin.active {
+            background: linear-gradient(135deg, rgba(121, 40, 202, 0.25) 0%, rgba(244, 63, 94, 0.25) 100%);
+            border: 1px solid rgba(121, 40, 202, 0.5);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(121, 40, 202, 0.25);
+        }
+
+        .portal-tab-btn.tab-fingerprint.active {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(0, 242, 254, 0.25) 100%);
+            border: 1px solid rgba(16, 185, 129, 0.55);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Student Sub-Switcher (Sign In vs Create Account) */
+        .student-sub-switcher {
+            display: flex;
+            background: rgba(6, 9, 19, 0.7);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            border-radius: 14px;
+            padding: 4px;
+            margin-bottom: 22px;
+            gap: 6px;
+        }
+
+        .sub-tab-btn {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 8px 12px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-            width: 300px;
-            position: relative; /* Position relative for absolute positioning of back icon */
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-decoration: none;
+            border: none;
+            background: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
-        h2 {
-            text-align: center;
-            color: #FFD700; /* Gold color */
-            margin-bottom: 20px;
-            font-weight: bold;
+
+        .sub-tab-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
         }
-        form {
+
+        .sub-tab-btn.active {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid rgba(16, 185, 129, 0.45);
+            color: #6ee7b7;
+            box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);
+        }
+
+        .sub-tab-create {
+            position: relative;
+        }
+
+        .sub-tab-badge {
+            font-size: 0.65rem;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            color: #030712;
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Student Action Callout Box */
+        .student-action-callout {
+            margin-top: 20px;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1.5px dashed rgba(16, 185, 129, 0.35);
+            border-radius: 16px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .callout-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .callout-icon {
+            font-size: 1.3rem;
+            color: #10b981;
+            flex-shrink: 0;
+        }
+
+        .callout-text strong {
+            display: block;
+            font-size: 0.85rem;
+            color: #ffffff;
+        }
+
+        .callout-text p {
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+
+        .btn-callout-register {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #10b981 0%, #00f2fe 100%);
+            color: #030712;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-callout-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.5);
+            color: #030712;
+        }
+
+        /* Biometric Hologram Scanner Widget */
+        .scanner-container {
             display: flex;
             flex-direction: column;
+            align-items: center;
+            margin-bottom: 28px;
+            position: relative;
         }
-        label {
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: bold;
+
+        .biometric-visual {
+            width: 88px;
+            height: 88px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
         }
-        input[type="text"],
-        input[type="password"] {
-            padding: 12px;
-            margin-bottom: 20px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-            transition: border-color 0.3s;
-        }
-        input:focus {
-            border-color: #FFD700; /* Gold color on focus */
-            outline: none;
-        }
-        button {
-            background-color: #FFD700; /* Gold color */
-            color: #121212; /* Dark text */
-            padding: 12px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #FFC107; /* Lighter gold on hover */
-        }
-        .message {
-            background-color: #f2dede;
-            color: #a94442;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            border: 1px solid #ebccd1;
-        }
-        .back-icon {
+
+        /* Concentric Animated Radar Rings */
+        .ring {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            font-size: 20px;
-            color: black; /* Changed back icon color to black */
+            border-radius: 50%;
+            border: 1.5px dashed var(--cyan-glow);
+            box-sizing: border-box;
+        }
+
+        .ring-outer {
+            width: 100%;
+            height: 100%;
+            border-style: dashed;
+            border-color: rgba(0, 242, 254, 0.5);
+            animation: rotateClockwise 12s linear infinite;
+        }
+
+        .ring-inner {
+            width: 78%;
+            height: 78%;
+            border: 1.5px solid rgba(121, 40, 202, 0.6);
+            border-left-color: transparent;
+            border-right-color: transparent;
+            animation: rotateCounterClockwise 6s linear infinite;
+        }
+
+        @keyframes rotateClockwise {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes rotateCounterClockwise {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+
+        /* Central Face Icon with Pulse */
+        .face-core {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(121, 40, 202, 0.2));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.35);
+            animation: corePulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes corePulse {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 28px rgba(0, 242, 254, 0.65);
+                transform: scale(1.05);
+            }
+        }
+
+        .face-core i {
+            font-size: 24px;
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Vertical Laser Sweep in Face Visual */
+        .laser-sweep {
+            position: absolute;
+            width: 80%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00f2fe, #fff, #00f2fe, transparent);
+            box-shadow: 0 0 8px #00f2fe;
+            animation: laserScan 2.4s ease-in-out infinite alternate;
+            z-index: 3;
+        }
+
+        @keyframes laserScan {
+            0% { top: 15%; opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { top: 85%; opacity: 0.2; }
+        }
+
+        /* Portal Header Titles */
+        .title-group {
+            text-align: center;
+        }
+
+        .badge-system {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--cyan-glow);
+            background: rgba(0, 242, 254, 0.08);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 242, 254, 0.22);
+            margin-bottom: 10px;
+        }
+
+        .badge-system .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background-color: var(--emerald-glow);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--emerald-glow);
+            animation: beacon 1.8s infinite;
+        }
+
+        @keyframes beacon {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
+        }
+
+        .title-group h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #ffffff 40%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+
+        .title-group p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Error / Notice Alert Messages */
+        .alert-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            margin-bottom: 20px;
+            animation: alertShake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+
+        @keyframes alertShake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+            40%, 60% { transform: translate3d(3px, 0, 0); }
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.35);
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            color: #6ee7b7;
+        }
+
+        .alert-info {
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            color: #7dd3fc;
+        }
+
+        .alert-box i {
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+
+        /* Form Inputs & Controls */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.84rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            color: #64748b;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+            pointer-events: none;
+        }
+
+        .input-field {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1.5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 14px 44px 14px 44px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .input-field:focus {
+            border-color: var(--cyan-glow);
+            background: rgba(15, 23, 42, 0.85);
+            box-shadow: 0 0 0 4px rgba(0, 242, 254, 0.14), 0 0 15px rgba(0, 242, 254, 0.2);
+        }
+
+        .input-field:focus + .input-icon,
+        .input-wrapper:focus-within .input-icon {
+            color: var(--cyan-glow);
+        }
+
+        .input-field::placeholder {
+            color: #475569;
+        }
+
+        /* Password Visibility Toggle Button */
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            background: none;
+            border: none;
+            color: #64748b;
             cursor: pointer;
+            padding: 6px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .toggle-password:hover {
+            color: var(--cyan-glow);
+            transform: scale(1.1);
+        }
+
+        /* High-Tech Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 15px 24px;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 50%, #7928ca 100%);
+            background-size: 200% auto;
+            border: none;
+            border-radius: 14px;
+            color: #ffffff;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 242, 254, 0.4);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .submit-btn:hover {
+            background-position: right center;
+            box-shadow: 0 12px 32px -4px rgba(121, 40, 202, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(1px) scale(0.99);
+        }
+
+        /* Hover Shimmer Wave */
+        .submit-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 50%;
+            height: 200%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.35),
+                transparent
+            );
+            transform: rotate(25deg);
+            transition: all 0.75s ease;
+        }
+
+        .submit-btn:hover::after {
+            left: 120%;
+        }
+
+        /* Loading Spinner Inside Button */
+        .btn-spinner {
+            display: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Footer Metadata / Tech Details */
+        .card-footer-info {
+            margin-top: 26px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.78rem;
+            color: #64748b;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .card-footer-info a {
+            color: var(--cyan-glow);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .card-footer-info a:hover {
+            text-decoration: underline;
+        }
+
+        /* Quick Hint Pill */
+        .demo-hint {
+            margin-top: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px dashed rgba(255, 255, 255, 0.12);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .demo-hint i {
+            color: #f59e0b;
+        }
+
+        /* Biometric Tab Active Accent */
+        .portal-tab-btn.tab-biometric.active {
+            background: linear-gradient(135deg, rgba(0, 242, 254, 0.25) 0%, rgba(16, 185, 129, 0.25) 100%);
+            border: 1px solid rgba(0, 242, 254, 0.55);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        /* Quick Biometric Button under credential form */
+        .btn-biometric-trigger {
+            width: 100%;
+            margin-top: 14px;
+            background: rgba(0, 242, 254, 0.08);
+            border: 1.5px dashed rgba(0, 242, 254, 0.35);
+            border-radius: 14px;
+            padding: 12px 16px;
+            color: #00f2fe;
+            font-family: inherit;
+            font-size: 0.88rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.25s ease;
+        }
+
+        .btn-biometric-trigger:hover {
+            background: rgba(0, 242, 254, 0.16);
+            border-color: #00f2fe;
+            box-shadow: 0 4px 18px rgba(0, 242, 254, 0.25);
+            transform: translateY(-1px);
+        }
+
+        /* Biometric Camera Viewport Container */
+        .bio-viewport {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            background: #020617;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 1.5px solid rgba(0, 242, 254, 0.35);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 242, 254, 0.15);
+            margin-bottom: 12px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .bio-viewport.verified-flash {
+            border-color: #10b981;
+            box-shadow: 0 0 35px rgba(16, 185, 129, 0.65);
+        }
+
+        #bioVideo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
+            display: block;
+        }
+
+        /* Camera Placeholder state */
+        .bio-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #0b1329 0%, #030712 90%);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            gap: 12px;
+            z-index: 2;
+        }
+
+        .placeholder-cam-icon {
+            font-size: 2.2rem;
+            color: #00f2fe;
+            animation: pulseCam 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseCam {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; filter: drop-shadow(0 0 10px #00f2fe); }
+        }
+
+        /* HUD Overlays */
+        .bio-hud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .hud-corner {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-color: #00f2fe;
+        }
+        .hud-corner.top-left { top: 12px; left: 12px; border-top: 2.5px solid #00f2fe; border-left: 2.5px solid #00f2fe; }
+        .hud-corner.top-right { top: 12px; right: 12px; border-top: 2.5px solid #00f2fe; border-right: 2.5px solid #00f2fe; }
+        .hud-corner.bottom-left { bottom: 12px; left: 12px; border-bottom: 2.5px solid #00f2fe; border-left: 2.5px solid #00f2fe; }
+        .hud-corner.bottom-right { bottom: 12px; right: 12px; border-bottom: 2.5px solid #00f2fe; border-right: 2.5px solid #00f2fe; }
+
+        /* Central Face Guide Box */
+        .face-guide-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 170px;
+            border-radius: 20px;
+            border: 1px dashed rgba(0, 242, 254, 0.45);
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.15);
+        }
+
+        .guide-corner {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-color: #00f2fe;
+        }
+        .guide-corner.tl { top: -2px; left: -2px; border-top: 2.5px solid #00f2fe; border-left: 2.5px solid #00f2fe; border-top-left-radius: 6px; }
+        .guide-corner.tr { top: -2px; right: -2px; border-top: 2.5px solid #00f2fe; border-right: 2.5px solid #00f2fe; border-top-right-radius: 6px; }
+        .guide-corner.bl { bottom: -2px; left: -2px; border-bottom: 2.5px solid #00f2fe; border-left: 2.5px solid #00f2fe; border-bottom-left-radius: 6px; }
+        .guide-corner.br { bottom: -2px; right: -2px; border-bottom: 2.5px solid #00f2fe; border-right: 2.5px solid #00f2fe; border-bottom-right-radius: 6px; }
+
+        .bio-laser-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, #00f2fe 30%, #ffffff 50%, #00f2fe 70%, transparent 100%);
+            box-shadow: 0 0 10px #00f2fe;
+            animation: sweepBioLaser 2.2s ease-in-out infinite alternate;
+        }
+
+        @keyframes sweepBioLaser {
+            0% { top: 8%; opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { top: 92%; opacity: 0.2; }
+        }
+
+        /* Biometric Status Pill */
+        .bio-status-wrapper {
+            text-align: center;
+            margin-bottom: 14px;
+        }
+
+        .bio-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 16px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbd5e1;
+            transition: all 0.3s ease;
+        }
+
+        .bio-status-pill.info {
+            border-color: rgba(0, 242, 254, 0.35);
+            color: #38bdf8;
+        }
+
+        .bio-status-pill.scanning {
+            border-color: #00f2fe;
+            color: #00f2fe;
+            box-shadow: 0 0 14px rgba(0, 242, 254, 0.3);
+        }
+
+        .bio-status-pill.success {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #10b981;
+            color: #34d399;
+            box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
+        }
+
+        .bio-status-pill.error {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+            color: #f87171;
+            box-shadow: 0 0 16px rgba(239, 68, 68, 0.3);
+        }
+
+        /* Biometric Action Row */
+        .bio-actions-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-secondary-bio {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary-bio:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+
+        .btn-secondary-bio.active-toggle {
+            background: rgba(16, 185, 129, 0.18);
+            border-color: #10b981;
+            color: #6ee7b7;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Fingerprint Login Station */
+        .fp-login-station {
+            padding: 8px 0;
+            text-align: center;
+        }
+
+        .fp-login-sensor-wrapper {
+            position: relative;
+            width: 170px;
+            height: 170px;
+            margin: 10px auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .fp-sensor-pad {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, #0f172a 0%, #030712 100%);
+            border: 2px solid rgba(16, 185, 129, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.25), inset 0 0 20px rgba(16, 185, 129, 0.15);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .fp-login-sensor-wrapper:hover .fp-sensor-pad {
+            transform: scale(1.05);
+            border-color: #10b981;
+            box-shadow: 0 0 35px rgba(16, 185, 129, 0.5), inset 0 0 25px rgba(16, 185, 129, 0.3);
+        }
+
+        .fp-sensor-pad.scanning {
+            border-color: #00f2fe;
+            box-shadow: 0 0 35px rgba(0, 242, 254, 0.6), inset 0 0 25px rgba(0, 242, 254, 0.35);
+            animation: fpPulseScan 1.2s infinite alternate;
+        }
+
+        .fp-sensor-pad.verified {
+            border-color: #10b981 !important;
+            background: radial-gradient(circle at center, rgba(16, 185, 129, 0.25) 0%, #030712 100%) !important;
+            box-shadow: 0 0 45px rgba(16, 185, 129, 0.85) !important;
+        }
+
+        @keyframes fpPulseScan {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.06); }
+        }
+
+        .fp-sensor-orbit {
+            position: absolute;
+            width: 156px;
+            height: 156px;
+            border-radius: 50%;
+            border: 1.5px dashed rgba(16, 185, 129, 0.45);
+            animation: rotateClockwise 12s linear infinite;
+            pointer-events: none;
+        }
+
+        .fp-sonar-pulse {
+            position: absolute;
+            border-radius: 50%;
+            border: 1.5px solid rgba(16, 185, 129, 0.4);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .fp-sonar-pulse.wave-1 {
+            width: 100%;
+            height: 100%;
+            animation: sonarPulse 3s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+        }
+
+        .fp-sonar-pulse.wave-2 {
+            width: 100%;
+            height: 100%;
+            animation: sonarPulse 3s cubic-bezier(0.2, 0.8, 0.2, 1) infinite 1s;
+        }
+
+        .fp-sonar-pulse.wave-3 {
+            width: 100%;
+            height: 100%;
+            animation: sonarPulse 3s cubic-bezier(0.2, 0.8, 0.2, 1) infinite 2s;
+        }
+
+        @keyframes sonarPulse {
+            0% { transform: scale(0.7); opacity: 0.8; }
+            100% { transform: scale(1.35); opacity: 0; }
+        }
+
+        .fp-main-icon {
+            font-size: 52px;
+            background: linear-gradient(135deg, #10b981 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .fp-sensor-pad.scanning .fp-main-icon {
+            background: linear-gradient(135deg, #00f2fe 0%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 8px #00f2fe);
+        }
+
+        .fp-sensor-pad.verified .fp-main-icon {
+            background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 12px #10b981);
+        }
+
+        .fp-touch-prompt {
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #64748b;
+            margin-top: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .fp-login-sensor-wrapper:hover .fp-touch-prompt {
+            color: #10b981;
+        }
+
+        .fp-laser-sweep {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #10b981 50%, transparent);
+            box-shadow: 0 0 10px #10b981;
+            animation: sweepFpLaser 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes sweepFpLaser {
+            0% { top: 12%; opacity: 0.2; }
+            50% { opacity: 1; }
+            100% { top: 88%; opacity: 0.2; }
+        }
+
+        .fp-telemetry-row {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 14px;
+            font-size: 0.76rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: #64748b;
+        }
+
+        .fp-tele-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .fp-tele-val {
+            color: #38bdf8;
+            font-weight: 600;
+        }
+
+        .fp-scan-btn {
+            background: linear-gradient(135deg, #10b981 0%, #00f2fe 50%, #4facfe 100%) !important;
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4) !important;
+        }
+
+        .fp-scan-btn:hover {
+            box-shadow: 0 12px 32px -4px rgba(0, 242, 254, 0.5) !important;
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <i class="fas fa-arrow-left back-icon" onclick="window.history.back();" aria-hidden="true"></i> <!-- Back icon -->
-        <h2>Admin Login</h2>
-        <p style="text-align: center; color: #333;">Please enter your admin username and password.</p> <!-- Instruction message -->
-        {% if messages %}
-            {% for message in messages %}
-                <div class="message">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
-        <form method="post">
-            {% csrf_token %}
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" placeholder="Enter admin username" required>
-            
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter admin password" required>
-            
-            <button type="submit">Login</button>
-        </form>
+    <!-- Dynamic Canvas Particle Constellation Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Nebula Ambient Glows -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <div class="login-wrapper">
+        <div class="login-card">
+            <!-- Back Navigation -->
+            {% if user.is_authenticated or request.session.student_id %}
+            <a href="{% url 'home' %}" class="nav-back">
+                <i class="fas fa-arrow-left"></i>
+                <span>Return to Dashboard</span>
+            </a>
+            {% endif %}
+
+            <!-- Portal Switcher Tabs -->
+            <div class="portal-switcher">
+                <button type="button" class="portal-tab-btn tab-student {% if active_tab == 'student' or active_tab != 'admin' and active_tab != 'biometric' and active_tab != 'fingerprint' %}active{% endif %}" id="tabStudentBtn" onclick="switchPortal('student')">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Student</span>
+                </button>
+                <button type="button" class="portal-tab-btn tab-admin {% if active_tab == 'admin' %}active{% endif %}" id="tabAdminBtn" onclick="switchPortal('admin')">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Admin</span>
+                </button>
+                <button type="button" class="portal-tab-btn tab-biometric {% if active_tab == 'biometric' %}active{% endif %}" id="tabBiometricBtn" onclick="switchPortal('biometric')">
+                    <i class="fas fa-camera"></i>
+                    <span>Face Biometric</span>
+                </button>
+                <button type="button" class="portal-tab-btn tab-fingerprint {% if active_tab == 'fingerprint' %}active{% endif %}" id="tabFingerprintBtn" onclick="switchPortal('fingerprint')">
+                    <i class="fas fa-fingerprint"></i>
+                    <span>Fingerprint</span>
+                </button>
+            </div>
+
+            <!-- Student Sub-Action Switcher (Sign In vs Create Account) -->
+            <div class="student-sub-switcher" id="studentSubSwitcher" style="{% if active_tab == 'admin' %}display: none;{% endif %}">
+                <button type="button" class="sub-tab-btn active" id="subTabSignIn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Student Sign In</span>
+                </button>
+                <a href="{% url 'capture_student' %}" class="sub-tab-btn sub-tab-create" id="subTabCreate">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Create Account</span>
+                    <span class="sub-tab-badge">Register</span>
+                </a>
+            </div>
+
+            <!-- Biometric Hologram Visual Header -->
+            <div class="scanner-container">
+                <div class="biometric-visual">
+                    <div class="ring ring-outer"></div>
+                    <div class="ring ring-inner"></div>
+                    <div class="laser-sweep"></div>
+                    <div class="face-core" id="faceCoreIcon">
+                        <i class="fas {% if active_tab == 'admin' %}fa-user-shield{% else %}fa-graduation-cap{% endif %}"></i>
+                    </div>
+                </div>
+
+                <div class="title-group">
+                    <div class="badge-system">
+                        <span class="pulse-dot"></span>
+                        <span id="badgeLabel">{% if active_tab == 'admin' %}Biometric Security Core{% else %}Student Biometric Portal{% endif %}</span>
+                    </div>
+                    <h2 id="portalTitle">{% if active_tab == 'admin' %}Administrator Access{% else %}Student Portal{% endif %}</h2>
+                    <p id="portalSubtitle">{% if active_tab == 'admin' %}Enter administrative credentials to proceed{% else %}Sign in with your registered student credentials{% endif %}</p>
+                </div>
+            </div>
+
+            <!-- Messages / Feedback Alerts -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert-box {% if 'error' in message.tags %}alert-error{% elif 'success' in message.tags %}alert-success{% else %}alert-info{% endif %}">
+                        <i class="fas {% if 'error' in message.tags %}fa-circle-exclamation{% elif 'success' in message.tags %}fa-circle-check{% else %}fa-circle-info{% endif %}"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Login Form -->
+            <form method="post" id="loginForm">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ next }}">
+                <input type="hidden" name="portal_type" id="portalTypeInput" value="{% if active_tab == 'admin' %}admin{% else %}student{% endif %}">
+
+                <!-- Student Login Fields Container -->
+                <div id="studentFields" style="{% if active_tab == 'admin' %}display: none;{% endif %}">
+                    <div class="form-group">
+                        <label class="form-label" for="student_identifier">
+                            <span>Student ID or Email</span>
+                            <i class="fas fa-id-card" style="color: #64748b; font-size: 0.8rem;"></i>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user-graduate input-icon"></i>
+                            <input 
+                                type="text" 
+                                id="student_identifier" 
+                                name="student_identifier" 
+                                class="input-field" 
+                                placeholder="e.g. lokeshwarmenati@gmail.com or ID" 
+                                {% if active_tab != 'admin' %}required{% endif %}
+                                autocomplete="username"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="student_key">
+                            <span>Phone Number (Security Key)</span>
+                            <i class="fas fa-mobile-screen" style="color: #64748b; font-size: 0.8rem;"></i>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-key input-icon"></i>
+                            <input 
+                                type="password" 
+                                id="student_key" 
+                                name="student_key" 
+                                class="input-field" 
+                                placeholder="Enter registered phone number" 
+                                {% if active_tab != 'admin' %}required{% endif %}
+                                autocomplete="current-password"
+                            >
+                            <button type="button" class="toggle-password" onclick="togglePass('student_key', 'studentToggleIcon')" aria-label="Toggle phone key visibility">
+                                <i class="far fa-eye" id="studentToggleIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Administrator Login Fields Container -->
+                <div id="adminFields" style="{% if active_tab != 'admin' %}display: none;{% endif %}">
+                    <div class="form-group">
+                        <label class="form-label" for="username">
+                            <span>Admin Username</span>
+                            <i class="fas fa-id-badge" style="color: #64748b; font-size: 0.8rem;"></i>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user-astronaut input-icon"></i>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                class="input-field" 
+                                placeholder="Enter admin ID (lokeshwar)" 
+                                {% if active_tab == 'admin' %}required{% endif %}
+                                autocomplete="username"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="password">
+                            <span>Secret Password</span>
+                            <i class="fas fa-key" style="color: #64748b; font-size: 0.8rem;"></i>
+                        </label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                class="input-field" 
+                                placeholder="Enter administrator password (12345)" 
+                                {% if active_tab == 'admin' %}required{% endif %}
+                                autocomplete="current-password"
+                            >
+                            <button type="button" class="toggle-password" onclick="togglePass('password', 'adminToggleIcon')" aria-label="Toggle password visibility">
+                                <i class="far fa-eye" id="adminToggleIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span class="btn-spinner" id="btnSpinner"></span>
+                    <span id="btnText"><i class="fas fa-sign-in-alt me-2"></i> <span id="submitBtnLabel">{% if active_tab == 'admin' %}Authenticate Administrator{% else %}Sign In to Student Portal{% endif %}</span></span>
+                </button>
+
+                <!-- Biometric Quick Options -->
+                <div style="margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <button type="button" class="btn-biometric-trigger" style="margin-top: 0; justify-content: center;" onclick="switchPortal('biometric')">
+                        <i class="fas fa-camera"></i>
+                        <span>Face Login</span>
+                    </button>
+                    <button type="button" class="btn-biometric-trigger" style="margin-top: 0; justify-content: center; border-color: rgba(16, 185, 129, 0.4); color: #34d399;" onclick="switchPortal('fingerprint')">
+                        <i class="fas fa-fingerprint"></i>
+                        <span>Fingerprint</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Biometric Face Scanner Section -->
+            <div id="biometricContainer" style="display: none;">
+                <div class="bio-viewport" id="bioViewport">
+                    <video id="bioVideo" autoplay playsinline muted></video>
+                    <canvas id="bioCanvas" style="display: none;"></canvas>
+                    
+                    <!-- Viewport Placeholder -->
+                    <div class="bio-placeholder" id="bioPlaceholder">
+                        <i class="fas fa-camera placeholder-cam-icon"></i>
+                        <span id="bioPlaceholderText">Starting camera feed...</span>
+                    </div>
+
+                    <!-- Holographic HUD Overlays -->
+                    <div class="bio-hud-overlay" id="bioHudOverlay" style="display: none;">
+                        <div class="hud-corner top-left"></div>
+                        <div class="hud-corner top-right"></div>
+                        <div class="hud-corner bottom-left"></div>
+                        <div class="hud-corner bottom-right"></div>
+                        
+                        <div class="hud-reticle">
+                            <div class="reticle-circle"></div>
+                            <div class="reticle-line horiz"></div>
+                            <div class="reticle-line vert"></div>
+                        </div>
+
+                        <div class="hud-scanner-bar"></div>
+                    </div>
+                </div>
+
+                <!-- Live Status Pill -->
+                <div class="bio-status-wrapper">
+                    <div class="bio-status-pill info" id="bioStatusPill">
+                        <i class="fas fa-info-circle" id="bioStatusIcon"></i>
+                        <span id="bioStatusMsg">Position your face within the camera frame...</span>
+                    </div>
+                </div>
+
+                <!-- Action Controls -->
+                <div class="bio-controls-grid">
+                    <button type="button" class="btn-bio-action" id="btnBioScan" onclick="scanAndAuthenticate()">
+                        <i class="fas fa-expand"></i>
+                        <span>Scan Face</span>
+                    </button>
+                    <button type="button" class="btn-bio-action" id="btnBioAuto" onclick="toggleAutoBioScan()">
+                        <i class="fas fa-bolt"></i>
+                        <span id="autoScanLabel">Auto-Scan: Off</span>
+                    </button>
+                </div>
+
+                <div class="bio-actions-row">
+                    <button type="button" class="btn-secondary-bio" onclick="switchPortal('fingerprint')">
+                        <i class="fas fa-fingerprint" style="color: #10b981;"></i>
+                        <span>Fingerprint</span>
+                    </button>
+                    <button type="button" class="btn-secondary-bio" onclick="switchPortal('student')">
+                        <i class="fas fa-user-graduate"></i>
+                        <span>Student Login</span>
+                    </button>
+                    <button type="button" class="btn-secondary-bio" onclick="switchPortal('admin')">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Admin Login</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Biometric Fingerprint Scanner Section -->
+            <div id="fingerprintContainer" style="display: none;">
+                <div class="fp-login-station">
+                    <!-- Sensor Pad Area -->
+                    <div class="fp-login-sensor-wrapper" id="fpLoginSensorWrapper" onclick="triggerFingerprintLogin()" title="Click or touch laptop fingerprint sensor">
+                        <div class="fp-sonar-pulse wave-1"></div>
+                        <div class="fp-sonar-pulse wave-2"></div>
+                        <div class="fp-sonar-pulse wave-3"></div>
+                        <div class="fp-sensor-orbit"></div>
+                        <div class="fp-sensor-pad" id="fpSensorPad">
+                            <div class="fp-laser-sweep"></div>
+                            <i class="fas fa-fingerprint fp-main-icon" id="fpMainIcon"></i>
+                            <div class="fp-touch-prompt" id="fpTouchPrompt">TOUCH SENSOR</div>
+                        </div>
+                    </div>
+
+                    <!-- Sensor Status Pill -->
+                    <div class="bio-status-wrapper" style="margin-top: 14px;">
+                        <div class="bio-status-pill info" id="fpLoginStatusPill">
+                            <i class="fas fa-fingerprint" id="fpLoginStatusIcon"></i>
+                            <span id="fpLoginStatusMsg">Touch your laptop fingerprint reader to sign in...</span>
+                        </div>
+                    </div>
+
+                    <!-- Main Action Button -->
+                    <div style="margin-top: 12px;">
+                        <button type="button" class="submit-btn fp-scan-btn" id="btnFpLoginAction" onclick="triggerFingerprintLogin()">
+                            <span class="btn-spinner" id="fpLoginSpinner" style="display: none;"></span>
+                            <span id="fpLoginBtnText"><i class="fas fa-fingerprint me-2"></i> Touch Laptop Sensor to Sign In</span>
+                        </button>
+                    </div>
+
+                    <!-- Telemetry Hardware Status -->
+                    <div class="fp-telemetry-row">
+                        <div class="fp-tele-item">
+                            <span class="fp-tele-label">Sensor:</span>
+                            <span class="fp-tele-val" id="fpHardwareStatus">Windows Hello / Touch ID</span>
+                        </div>
+                        <div class="fp-tele-item">
+                            <span class="fp-tele-label">Protocol:</span>
+                            <span class="fp-tele-val">WebAuthn FIDO2</span>
+                        </div>
+                    </div>
+
+                    <!-- Alternate Switch Buttons -->
+                    <div class="bio-actions-row" style="margin-top: 16px;">
+                        <button type="button" class="btn-secondary-bio" onclick="switchPortal('biometric')">
+                            <i class="fas fa-camera"></i>
+                            <span>Face Biometric</span>
+                        </button>
+                        <button type="button" class="btn-secondary-bio" onclick="switchPortal('student')">
+                            <i class="fas fa-user-graduate"></i>
+                            <span>Student Login</span>
+                        </button>
+                        <button type="button" class="btn-secondary-bio" onclick="switchPortal('admin')">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Admin Login</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Details -->
+            <div class="card-footer-info">
+                <span>AI Core: v1.0 Active</span>
+                <span>SHA-256 Auth</span>
+            </div>
+        </div>
     </div>
+
+    <!-- Script for Dynamic Particles, Password Toggle, and Interactive Animations -->
+    <script>
+        let bioStream = null;
+        let bioAutoScanInterval = null;
+        let isScanning = false;
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function playSuccessChime() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.setValueAtTime(880.00, ctx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.25, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch(e) {}
+        }
+
+        function setBioStatus(message, state = 'info') {
+            const pill = document.getElementById('bioStatusPill');
+            const msg = document.getElementById('bioStatusMsg');
+            const icon = document.getElementById('bioStatusIcon');
+            if (!pill || !msg || !icon) return;
+
+            pill.className = `bio-status-pill ${state}`;
+            msg.textContent = message;
+
+            if (state === 'success') {
+                icon.className = 'fas fa-circle-check';
+            } else if (state === 'error') {
+                icon.className = 'fas fa-circle-exclamation';
+            } else if (state === 'scanning') {
+                icon.className = 'fas fa-spinner fa-spin';
+            } else {
+                icon.className = 'fas fa-shield-halved';
+            }
+        }
+
+        async function startBiometricCamera() {
+            const video = document.getElementById('bioVideo');
+            const placeholder = document.getElementById('bioPlaceholder');
+            const hud = document.getElementById('bioHudOverlay');
+
+            if (bioStream) {
+                return;
+            }
+
+            try {
+                setBioStatus('Requesting camera access...', 'scanning');
+                const constraints = {
+                    video: {
+                        width: { ideal: 640, min: 320 },
+                        height: { ideal: 480, min: 240 },
+                        facingMode: 'user'
+                    }
+                };
+
+                bioStream = await navigator.mediaDevices.getUserMedia(constraints);
+                if (video) {
+                    video.srcObject = bioStream;
+                    video.onloadedmetadata = () => {
+                        video.play().then(() => {
+                            if (placeholder) placeholder.style.display = 'none';
+                            if (hud) hud.style.display = 'block';
+                            setBioStatus('Camera active. Align face inside frame to scan.', 'info');
+                        }).catch(err => {
+                            console.error('Video play error:', err);
+                        });
+                    };
+                }
+            } catch (err) {
+                console.error('Camera access error:', err);
+                setBioStatus('Camera access denied or unavailable. Please check browser permissions.', 'error');
+                const placeholderText = document.getElementById('bioPlaceholderText');
+                if (placeholderText) placeholderText.textContent = 'Camera permission required';
+            }
+        }
+
+        function stopBiometricCamera() {
+            if (bioAutoScanInterval) {
+                clearInterval(bioAutoScanInterval);
+                bioAutoScanInterval = null;
+                const autoBtn = document.getElementById('btnAutoScanToggle');
+                const autoLabel = document.getElementById('autoScanLabel');
+                if (autoBtn) autoBtn.classList.remove('active-toggle');
+                if (autoLabel) autoLabel.textContent = 'Auto-Scan: Off';
+            }
+
+            if (bioStream) {
+                bioStream.getTracks().forEach(track => track.stop());
+                bioStream = null;
+            }
+
+            const video = document.getElementById('bioVideo');
+            if (video) {
+                video.srcObject = null;
+            }
+            const placeholder = document.getElementById('bioPlaceholder');
+            const hud = document.getElementById('bioHudOverlay');
+            if (placeholder) placeholder.style.display = 'flex';
+            if (hud) hud.style.display = 'none';
+        }
+
+        async function scanAndAuthenticate() {
+            if (isScanning) return;
+
+            const video = document.getElementById('bioVideo');
+            const canvas = document.getElementById('bioCanvas');
+            const btn = document.getElementById('btnCaptureBio');
+            const spinner = document.getElementById('bioSpinner');
+            const btnText = document.getElementById('bioBtnText');
+            const viewport = document.getElementById('bioViewport');
+
+            if (!video || !bioStream || video.readyState < 2) {
+                setBioStatus('Camera feed not ready yet. Please wait a moment...', 'info');
+                return;
+            }
+
+            isScanning = true;
+            setBioStatus('Verifying facial biometric signature...', 'scanning');
+            if (spinner) spinner.style.display = 'inline-block';
+            if (btnText) btnText.innerHTML = 'Verifying Biometrics...';
+            if (btn) btn.disabled = true;
+
+            try {
+                canvas.width = video.videoWidth || 640;
+                canvas.height = video.videoHeight || 480;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = canvas.toDataURL('image/jpeg', 0.85);
+
+                const formData = new FormData();
+                formData.append('image_data', imageData);
+                formData.append('portal_type', 'auto');
+
+                const csrftoken = getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+                const response = await fetch('/api/biometric-login/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: csrftoken ? { 'X-CSRFToken': csrftoken } : {}
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    playSuccessChime();
+                    setBioStatus(`✓ Verified! Welcome, ${data.name}! Redirecting...`, 'success');
+                    if (viewport) viewport.classList.add('verified-flash');
+                    
+                    stopBiometricCamera();
+                    setTimeout(() => {
+                        window.location.href = data.redirect_url || '/';
+                    }, 700);
+                    return;
+                } else {
+                    setBioStatus(data.message || 'Face biometric not recognized. Please face camera squarely.', 'error');
+                }
+            } catch (err) {
+                console.error('Biometric authentication error:', err);
+                setBioStatus('Error connecting to biometric verification service.', 'error');
+            } finally {
+                isScanning = false;
+                if (spinner) spinner.style.display = 'none';
+                if (btnText) btnText.innerHTML = '<i class="fas fa-camera me-2"></i> Scan Face & Sign In';
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        function toggleAutoBioScan() {
+            const autoBtn = document.getElementById('btnAutoScanToggle');
+            const autoLabel = document.getElementById('autoScanLabel');
+
+            if (bioAutoScanInterval) {
+                clearInterval(bioAutoScanInterval);
+                bioAutoScanInterval = null;
+                if (autoBtn) autoBtn.classList.remove('active-toggle');
+                if (autoLabel) autoLabel.textContent = 'Auto-Scan: Off';
+                setBioStatus('Auto-scan disabled. Click button to scan manually.', 'info');
+            } else {
+                if (!bioStream) {
+                    startBiometricCamera();
+                }
+                if (autoBtn) autoBtn.classList.add('active-toggle');
+                if (autoLabel) autoLabel.textContent = 'Auto-Scan: Active';
+                setBioStatus('Auto-scan active. Keep face steady in front of camera...', 'scanning');
+                
+                scanAndAuthenticate();
+                bioAutoScanInterval = setInterval(() => {
+                    if (!isScanning && bioStream) {
+                        scanAndAuthenticate();
+                    }
+                }, 1600);
+            }
+        }
+
+        // WebAuthn Biometric Buffer Helpers
+        function base64UrlToUint8Array(base64Url) {
+            const padding = '='.repeat((4 - (base64Url.length % 4)) % 4);
+            const base64 = (base64Url + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = window.atob(base64);
+            const outputArray = new Uint8Array(rawData.length);
+            for (let i = 0; i < rawData.length; ++i) {
+                outputArray[i] = rawData.charCodeAt(i);
+            }
+            return outputArray;
+        }
+
+        function bufferToBase64Url(buffer) {
+            const bytes = new Uint8Array(buffer);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        function setFpLoginStatus(message, state = 'info') {
+            const pill = document.getElementById('fpLoginStatusPill');
+            const msg = document.getElementById('fpLoginStatusMsg');
+            const icon = document.getElementById('fpLoginStatusIcon');
+            const pad = document.getElementById('fpSensorPad');
+            if (!pill || !msg || !icon) return;
+
+            pill.className = `bio-status-pill ${state}`;
+            msg.textContent = message;
+
+            if (pad) {
+                pad.classList.remove('scanning', 'verified');
+                if (state === 'scanning') pad.classList.add('scanning');
+                if (state === 'success') pad.classList.add('verified');
+            }
+
+            if (state === 'success') {
+                icon.className = 'fas fa-circle-check';
+            } else if (state === 'error') {
+                icon.className = 'fas fa-circle-exclamation';
+            } else if (state === 'scanning') {
+                icon.className = 'fas fa-spinner fa-spin';
+            } else {
+                icon.className = 'fas fa-fingerprint';
+            }
+        }
+
+        let isFpLoggingIn = false;
+
+        async function triggerFingerprintLogin() {
+            if (isFpLoggingIn) return;
+
+            // Enforce localhost for WebAuthn in local dev
+            if (window.location.hostname === '127.0.0.1') {
+                window.location.href = window.location.href.replace('127.0.0.1', 'localhost');
+                return;
+            }
+
+            if (!window.PublicKeyCredential) {
+                setFpLoginStatus('WebAuthn / Windows Hello is not supported in this browser. Please use Chrome or Edge.', 'error');
+                return;
+            }
+
+            isFpLoggingIn = true;
+            const spinner = document.getElementById('fpLoginSpinner');
+            const btnText = document.getElementById('fpLoginBtnText');
+            const btn = document.getElementById('btnFpLoginAction');
+            const touchPrompt = document.getElementById('fpTouchPrompt');
+
+            if (spinner) spinner.style.display = 'inline-block';
+            if (btnText) btnText.innerHTML = 'Waiting for Laptop Sensor...';
+            if (btn) btn.disabled = true;
+            if (touchPrompt) touchPrompt.textContent = 'SCANNING...';
+
+            setFpLoginStatus('Sensor active. Please touch your laptop fingerprint reader...', 'scanning');
+
+            try {
+                // 1. Fetch challenge and registered credentials from backend
+                const chalRes = await fetch('/api/webauthn/attendance-challenge/');
+                const chalData = await chalRes.json();
+
+                if (!chalData.success) {
+                    throw new Error(chalData.message || 'Failed to initialize biometric challenge.');
+                }
+
+                const challengeBuffer = base64UrlToUint8Array(chalData.challenge);
+                const allowCredentials = (chalData.allowCredentials || []).map(cred => ({
+                    id: base64UrlToUint8Array(cred.id),
+                    type: 'public-key',
+                    transports: ['internal']
+                }));
+
+                const publicKeyOptions = {
+                    challenge: challengeBuffer,
+                    rpId: chalData.rpId || window.location.hostname,
+                    userVerification: 'required',
+                    timeout: 60000
+                };
+
+                if (allowCredentials.length > 0) {
+                    publicKeyOptions.allowCredentials = allowCredentials;
+                }
+
+                // 2. Invoke Laptop Fingerprint Reader (Windows Hello)
+                const credential = await navigator.credentials.get({
+                    publicKey: publicKeyOptions
+                });
+
+                if (!credential) {
+                    throw new Error('No credential received from fingerprint sensor.');
+                }
+
+                const credentialIdB64 = bufferToBase64Url(credential.rawId);
+                setFpLoginStatus('Biometric signature captured! Verifying identity...', 'scanning');
+
+                // 3. Post credential to login verify
+                const formData = new FormData();
+                formData.append('credential_id', credentialIdB64);
+
+                const csrftoken = getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value;
+                const verifyRes = await fetch('/api/webauthn/login-verify/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: csrftoken ? { 'X-CSRFToken': csrftoken } : {}
+                });
+
+                const verifyData = await verifyRes.json();
+
+                if (verifyData.success) {
+                    playSuccessChime();
+                    setFpLoginStatus(`✓ Fingerprint verified! Welcome, ${verifyData.name}! Redirecting...`, 'success');
+                    if (touchPrompt) touchPrompt.textContent = 'VERIFIED';
+                    setTimeout(() => {
+                        window.location.href = verifyData.redirect_url || '/';
+                    }, 700);
+                    return;
+                } else {
+                    setFpLoginStatus(verifyData.message || 'Fingerprint not recognized. Please try again.', 'error');
+                    if (touchPrompt) touchPrompt.textContent = 'RETRY';
+                }
+            } catch (err) {
+                console.error('Fingerprint login error:', err);
+                if (err.name === 'NotAllowedError') {
+                    setFpLoginStatus('Biometric prompt was canceled or timed out. Tap sensor to retry.', 'info');
+                } else {
+                    setFpLoginStatus(err.message || 'Fingerprint authentication failed.', 'error');
+                }
+                if (touchPrompt) touchPrompt.textContent = 'TAP SENSOR';
+            } finally {
+                isFpLoggingIn = false;
+                if (spinner) spinner.style.display = 'none';
+                if (btnText) btnText.innerHTML = '<i class="fas fa-fingerprint me-2"></i> Touch Laptop Sensor to Sign In';
+                if (btn) btn.disabled = false;
+            }
+        }
+
+        function switchPortal(portal) {
+            const portalInput = document.getElementById('portalTypeInput');
+            const tabStudent = document.getElementById('tabStudentBtn');
+            const tabAdmin = document.getElementById('tabAdminBtn');
+            const tabBiometric = document.getElementById('tabBiometricBtn');
+            const tabFingerprint = document.getElementById('tabFingerprintBtn');
+            const loginForm = document.getElementById('loginForm');
+            const bioContainer = document.getElementById('biometricContainer');
+            const fpContainer = document.getElementById('fingerprintContainer');
+            const studentFields = document.getElementById('studentFields');
+            const adminFields = document.getElementById('adminFields');
+            const studentIdInput = document.getElementById('student_identifier');
+            const studentKeyInput = document.getElementById('student_key');
+            const adminUserInput = document.getElementById('username');
+            const adminPassInput = document.getElementById('password');
+            const portalTitle = document.getElementById('portalTitle');
+            const portalSubtitle = document.getElementById('portalSubtitle');
+            const badgeLabel = document.getElementById('badgeLabel');
+            const submitBtnLabel = document.getElementById('submitBtnLabel');
+            const hintText = document.getElementById('hintText');
+            const faceCoreIcon = document.getElementById('faceCoreIcon');
+            const studentSubSwitcher = document.getElementById('studentSubSwitcher');
+            const studentCallout = document.getElementById('studentCallout');
+
+            if (portalInput) portalInput.value = portal;
+
+            if (portal === 'fingerprint') {
+                stopBiometricCamera();
+                if (tabFingerprint) tabFingerprint.classList.add('active');
+                if (tabBiometric) tabBiometric.classList.remove('active');
+                if (tabAdmin) tabAdmin.classList.remove('active');
+                if (tabStudent) tabStudent.classList.remove('active');
+
+                if (loginForm) loginForm.style.display = 'none';
+                if (bioContainer) bioContainer.style.display = 'none';
+                if (fpContainer) fpContainer.style.display = 'block';
+                if (studentSubSwitcher) studentSubSwitcher.style.display = 'none';
+                if (studentCallout) studentCallout.style.display = 'none';
+
+                if (adminUserInput) adminUserInput.required = false;
+                if (adminPassInput) adminPassInput.required = false;
+                if (studentIdInput) studentIdInput.required = false;
+                if (studentKeyInput) studentKeyInput.required = false;
+
+                if (portalTitle) portalTitle.textContent = 'Biometric Fingerprint Login';
+                if (portalSubtitle) portalSubtitle.textContent = 'Touch your laptop fingerprint reader (Windows Hello / Touch ID) to authenticate';
+                if (badgeLabel) badgeLabel.textContent = 'Physical Biometric Hardware Sensor';
+                if (hintText) hintText.textContent = 'Hardware Biometrics: Place enrolled finger on laptop sensor to sign in automatically.';
+                if (faceCoreIcon) faceCoreIcon.innerHTML = '<i class="fas fa-fingerprint" style="color: #10b981;"></i>';
+
+                // Automatically prime status and prompt user
+                setFpLoginStatus('Touch laptop fingerprint reader or tap button below to sign in...', 'info');
+
+            } else if (portal === 'biometric') {
+                if (tabBiometric) tabBiometric.classList.add('active');
+                if (tabFingerprint) tabFingerprint.classList.remove('active');
+                if (tabAdmin) tabAdmin.classList.remove('active');
+                if (tabStudent) tabStudent.classList.remove('active');
+
+                if (loginForm) loginForm.style.display = 'none';
+                if (bioContainer) bioContainer.style.display = 'block';
+                if (fpContainer) fpContainer.style.display = 'none';
+                if (studentSubSwitcher) studentSubSwitcher.style.display = 'none';
+                if (studentCallout) studentCallout.style.display = 'none';
+
+                if (adminUserInput) adminUserInput.required = false;
+                if (adminPassInput) adminPassInput.required = false;
+                if (studentIdInput) studentIdInput.required = false;
+                if (studentKeyInput) studentKeyInput.required = false;
+
+                if (portalTitle) portalTitle.textContent = 'Biometric Face Login';
+                if (portalSubtitle) portalSubtitle.textContent = 'Look directly at the camera to authenticate with facial biometrics';
+                if (badgeLabel) badgeLabel.textContent = 'AI Neural Biometric Core';
+                if (hintText) hintText.textContent = 'Biometrics: Align your face within the reticle. Click "Scan Face" or enable Auto-Scan.';
+                if (faceCoreIcon) faceCoreIcon.innerHTML = '<i class="fas fa-camera"></i>';
+
+                startBiometricCamera();
+            } else if (portal === 'admin') {
+                stopBiometricCamera();
+                if (tabAdmin) tabAdmin.classList.add('active');
+                if (tabStudent) tabStudent.classList.remove('active');
+                if (tabBiometric) tabBiometric.classList.remove('active');
+                if (tabFingerprint) tabFingerprint.classList.remove('active');
+
+                if (loginForm) loginForm.style.display = 'block';
+                if (bioContainer) bioContainer.style.display = 'none';
+                if (fpContainer) fpContainer.style.display = 'none';
+                if (adminFields) adminFields.style.display = 'block';
+                if (studentFields) studentFields.style.display = 'none';
+                if (studentSubSwitcher) studentSubSwitcher.style.display = 'none';
+                if (studentCallout) studentCallout.style.display = 'none';
+
+                if (adminUserInput) adminUserInput.required = true;
+                if (adminPassInput) adminPassInput.required = true;
+                if (studentIdInput) studentIdInput.required = false;
+                if (studentKeyInput) studentKeyInput.required = false;
+
+                if (portalTitle) portalTitle.textContent = 'Administrator Access';
+                if (portalSubtitle) portalSubtitle.textContent = 'Enter administrative credentials to proceed';
+                if (badgeLabel) badgeLabel.textContent = 'Biometric Security Core';
+                if (submitBtnLabel) submitBtnLabel.textContent = 'Authenticate Administrator';
+                if (hintText) hintText.textContent = 'Administrator access: ID: lokeshwar (Access restricted to authorized admin account).';
+                if (faceCoreIcon) faceCoreIcon.innerHTML = '<i class="fas fa-user-shield"></i>';
+            } else {
+                stopBiometricCamera();
+                if (tabStudent) tabStudent.classList.add('active');
+                if (tabAdmin) tabAdmin.classList.remove('active');
+                if (tabBiometric) tabBiometric.classList.remove('active');
+                if (tabFingerprint) tabFingerprint.classList.remove('active');
+
+                if (loginForm) loginForm.style.display = 'block';
+                if (bioContainer) bioContainer.style.display = 'none';
+                if (fpContainer) fpContainer.style.display = 'none';
+                if (studentFields) studentFields.style.display = 'block';
+                if (adminFields) adminFields.style.display = 'none';
+                if (studentSubSwitcher) studentSubSwitcher.style.display = 'flex';
+                if (studentCallout) studentCallout.style.display = 'flex';
+
+                if (studentIdInput) studentIdInput.required = true;
+                if (studentKeyInput) studentKeyInput.required = true;
+                if (adminUserInput) adminUserInput.required = false;
+                if (adminPassInput) adminPassInput.required = false;
+
+                if (portalTitle) portalTitle.textContent = 'Student Portal';
+                if (portalSubtitle) portalSubtitle.textContent = 'Sign in with your registered student credentials';
+                if (badgeLabel) badgeLabel.textContent = 'Student Biometric Portal';
+                if (submitBtnLabel) submitBtnLabel.textContent = 'Sign In to Student Portal';
+                if (hintText) hintText.textContent = 'Students: Enter your registered email or student ID with your phone number.';
+                if (faceCoreIcon) faceCoreIcon.innerHTML = '<i class="fas fa-graduation-cap"></i>';
+            }
+        }
+
+        // Initialize active tab from server context if requested
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tabParam = urlParams.get('tab');
+            if (tabParam === 'fingerprint') {
+                switchPortal('fingerprint');
+            } else if (tabParam === 'biometric') {
+                switchPortal('biometric');
+            } else if (tabParam === 'admin') {
+                switchPortal('admin');
+            }
+        });
+
+        function togglePass(fieldId, iconId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(iconId);
+            if (!field || !icon) return;
+            const isPassword = field.getAttribute('type') === 'password';
+            field.setAttribute('type', isPassword ? 'text' : 'password');
+            icon.className = isPassword ? 'far fa-eye-slash' : 'far fa-eye';
+        }
+
+        // Form Submit Loading State
+        const loginForm = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const btnText = document.getElementById('btnText');
+
+        loginForm.addEventListener('submit', () => {
+            btnSpinner.style.display = 'inline-block';
+            btnText.innerHTML = 'Verifying Biometrics...';
+            submitBtn.style.pointerEvents = 'none';
+            submitBtn.style.opacity = '0.9';
+        });
+
+        // Dynamic Interactive Particle Constellation Canvas
+        const canvas = document.getElementById('bg-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let particles = [];
+        const particleCount = 48;
+        const maxDistance = 120;
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.8;
+                this.vy = (Math.random() - 0.5) * 0.8;
+                this.radius = Math.random() * 2 + 1;
+                this.color = Math.random() > 0.5 ? 'rgba(0, 242, 254,' : 'rgba(121, 40, 202,';
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < 0 || this.y > height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color + ' 0.7)';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#00f2fe';
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Connect nearby nodes
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < maxDistance) {
+                        const alpha = (1 - dist / maxDistance) * 0.18;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = `rgba(0, 242, 254, ${alpha})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
 </body>
 </html>
