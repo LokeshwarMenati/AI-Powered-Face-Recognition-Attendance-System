@@ -301,9 +301,14 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'student-detail' pk=student.pk %}" class="btn-action-view">
-                                        <i class="fas fa-id-card"></i> Profile
-                                    </a>
+                                    <div style="display: inline-flex; gap: 8px;">
+                                        <a href="{% url 'student-detail' pk=student.pk %}" class="btn-action-view" title="Manage student profile and authorization">
+                                            <i class="fas fa-id-card"></i> Profile
+                                        </a>
+                                        <a href="{% url 'student_dashboard' %}?student_id={{ student.id }}" class="btn-action-view" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border-color: rgba(168, 85, 247, 0.35);" title="Access this student's portal as Admin">
+                                            <i class="fas fa-user-shield"></i> Portal
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                             {% endfor %}

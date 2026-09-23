@@ -810,9 +810,9 @@
 
     <div class="container">
         <div class="top-nav">
-            <a href="{% url 'home' %}" class="btn-back-nav">
+            <a href="{% if request.session.user_role == 'student' %}{% url 'student_dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="btn-back-nav">
                 <i class="fas fa-arrow-left"></i>
-                <span>Return to Dashboard</span>
+                <span>Return to {% if request.session.user_role == 'student' %}Student Dashboard{% else %}Command Center{% endif %}</span>
             </a>
             <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: var(--cyan-glow); background: rgba(0, 242, 254, 0.08); padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(0, 242, 254, 0.25);">
                 <i class="fas fa-fingerprint me-1"></i> BIOMETRIC 2-STEP ENROLLMENT
@@ -972,10 +972,12 @@
                             <p id="sensorStatusSub">Touch the optical pad above or click the button below to capture minutiae</p>
                         </div>
 
-                        <!-- Explicit Scan Trigger Button -->
-                        <button type="button" class="btn-scan-trigger" id="btnScanTrigger" onclick="scanFingerprint()">
-                            <i class="fas fa-fingerprint me-2"></i> <span id="scanTriggerText">Scan Right Index Finger</span>
-                        </button>
+                        <!-- Physical Laptop Fingerprint Sensor Trigger -->
+                        <div style="display: flex; gap: 10px; width: 100%; justify-content: center; margin-top: 6px;">
+                            <button type="button" class="btn-scan-trigger" id="btnHardwareScanTrigger" onclick="scanFingerprint(true)" style="width: 100%; max-width: 480px; background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(16, 185, 129, 0.25)); border: 1.5px solid var(--cyan-glow); color: #ffffff; font-weight: 700; padding: 14px 22px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.95rem; box-shadow: 0 4px 20px rgba(0, 242, 254, 0.25);">
+                                <i class="fas fa-fingerprint me-1" style="font-size: 1.2rem; color: var(--cyan-glow);"></i> <span id="scanTriggerText">Touch Laptop Fingerprint Sensor to Enroll</span>
+                            </button>
+                        </div>
 
                         <!-- Uniqueness Real-time Verification Box -->
                         <div class="uniqueness-status-box" id="uniquenessStatusBox">
@@ -1024,6 +1026,11 @@
     {{ existing_fps_json|json_script:"existing-fps-data" }}
 
     <script>
+        // Auto-switch 127.0.0.1 to localhost for WebAuthn platform authenticator compatibility
+        if (window.location.hostname === '127.0.0.1') {
+            window.location.replace(window.location.href.replace('127.0.0.1', 'localhost'));
+        }
+
         // DOM Elements
         const video = document.getElementById('video');
         const hiddenFaceCanvas = document.getElementById('hiddenFaceCanvas');
@@ -1290,21 +1297,7 @@
             drawBiometricPattern(name, currentSelectedFinger, false);
         }
 
-        // ================= OPTICAL FINGERPRINT SCAN & UNIQUENESS DETECTION =================
-        // Generates deterministic yet unique minutiae characteristics based on student & finger seed
-        function generateFingerprintHash(studentName, studentEmail, fingerType) {
-            const seed = `${studentName.toLowerCase()}_${studentEmail.toLowerCase()}_${fingerType}`;
-            let hashVal = 5381;
-            for (let i = 0; i < seed.length; i++) {
-                hashVal = ((hashVal << 5) + hashVal) + seed.charCodeAt(i);
-                hashVal = hashVal & hashVal; // Convert to 32bit integer
-            }
-            const positiveHash = Math.abs(hashVal);
-            const hex = positiveHash.toString(16).toUpperCase().padStart(8, '0');
-            const fingerCode = fingerType.replace(/\s+/g, '').substring(0, 4).toUpperCase();
-            return `FP-${fingerCode}-${hex.substring(0, 4)}-${hex.substring(4, 8)}`;
-        }
-
+        // ================= PHYSICAL WEBAUTHN BIOMETRIC SENSOR UTILITIES =================
         // Base64URL helper utilities for WebAuthn Biometric API
         function base64UrlToUint8Array(base64Url) {
             const padding = '='.repeat((4 - (base64Url.length % 4)) % 4);
@@ -1326,12 +1319,7 @@
             return window.btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
         }
 
-        // Auto-switch 127.0.0.1 to localhost for WebAuthn platform authenticator compatibility
-        if (window.location.hostname === '127.0.0.1') {
-            window.location.replace(window.location.href.replace('127.0.0.1', 'localhost'));
-        }
-
-        async function scanFingerprint() {
+        async function scanFingerprint(useHardware = true) {
             if (isFpScanning) return;
             isFpScanning = true;
 
@@ -1339,101 +1327,106 @@
             const email = document.getElementById('email').value.trim();
 
             opticalSensorPad.className = 'optical-sensor-glass scanning';
-            sensorStatusTitle.textContent = `Touch Laptop Fingerprint Sensor...`;
-            sensorStatusSub.textContent = `Place your ${currentSelectedFinger} on the physical fingerprint sensor on your laptop (Windows Hello)...`;
             uniquenessStatusBox.style.display = 'none';
             minutiaeMetricsRow.style.display = 'none';
 
-            const scanTriggerBtn = document.getElementById('btnScanTrigger');
-            if (scanTriggerBtn) {
-                scanTriggerBtn.disabled = true;
-                scanTriggerBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Touch Sensor When Prompted...';
+            const hwScanBtn = document.getElementById('btnHardwareScanTrigger');
+            if (hwScanBtn) {
+                hwScanBtn.disabled = true;
+                hwScanBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> <span>Touch Laptop Fingerprint Sensor...</span>';
             }
 
             playTone(440, 'triangle', 0.1, 0.2);
             setTimeout(() => playTone(550, 'sine', 0.1, 0.2), 150);
 
             let candidateFpId = null;
-            let minutiaeCount = 64;
+            let minutiaeCount = 128;
 
-            // Attempt Physical Biometric Capture via WebAuthn Platform Authenticator (Windows Hello)
-            if (window.PublicKeyCredential) {
-                try {
-                    const chResp = await fetch('/api/webauthn/register-challenge/', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: new URLSearchParams({ student_name: name, email: email })
-                    });
-                    const chData = await chResp.json();
+            sensorStatusTitle.textContent = `Touch Laptop Fingerprint Sensor...`;
+            sensorStatusSub.textContent = `Place your ${currentSelectedFinger} on the laptop sensor (Windows Hello) when prompted...`;
 
-                    if (!chData.success) {
-                        throw new Error(chData.message || 'Could not initiate registration challenge');
-                    }
-
-                    const challengeBytes = base64UrlToUint8Array(chData.challenge);
-                    const userIdBytes = base64UrlToUint8Array(chData.user.id);
-
-                    const cred = await navigator.credentials.create({
-                        publicKey: {
-                            challenge: challengeBytes,
-                            rp: {
-                                name: chData.rp.name,
-                                id: chData.rp.id
-                            },
-                            user: {
-                                id: userIdBytes,
-                                name: chData.user.name,
-                                displayName: chData.user.displayName
-                            },
-                            pubKeyCredParams: [
-                                { alg: -7, type: 'public-key' },  // ES256
-                                { alg: -257, type: 'public-key' } // RS256
-                            ],
-                            authenticatorSelection: {
-                                authenticatorAttachment: 'platform',
-                                userVerification: 'required'
-                            },
-                            timeout: 60000
-                        }
-                    });
-
-                    if (cred && cred.id) {
-                        candidateFpId = cred.id;
-                    }
-                } catch (authErr) {
-                    console.warn('Physical biometric sensor prompt was cancelled or timed out:', authErr);
-                    sensorStatusTitle.textContent = "Sensor Prompt Cancelled";
-                    sensorStatusSub.textContent = "No finger was placed or sensor touch was cancelled. Click below to try touching your laptop reader again.";
-                    opticalSensorPad.className = 'optical-sensor-glass';
-                    isFpScanning = false;
-                    currentFingerprintUnique = false;
-                    btnFinalSubmit.disabled = true;
-                    if (scanTriggerBtn) {
-                        scanTriggerBtn.disabled = false;
-                        scanTriggerBtn.innerHTML = `<i class="fas fa-fingerprint me-2"></i> Scan ${currentSelectedFinger} Finger Now`;
-                    }
-                    return;
-                }
-            } else {
-                sensorStatusTitle.textContent = "Sensor Not Supported";
-                sensorStatusSub.textContent = "WebAuthn platform biometric authenticator is not supported on this browser.";
-                opticalSensorPad.className = 'optical-sensor-glass';
+            if (!window.PublicKeyCredential) {
                 isFpScanning = false;
-                if (scanTriggerBtn) {
-                    scanTriggerBtn.disabled = false;
-                    scanTriggerBtn.innerHTML = `<i class="fas fa-fingerprint me-2"></i> Scan ${currentSelectedFinger} Finger Now`;
+                opticalSensorPad.className = 'optical-sensor-glass duplicate-error';
+                playErrorBuzz();
+                sensorStatusTitle.textContent = "Biometric Sensor Unsupported";
+                sensorStatusSub.textContent = "WebAuthn platform biometric reader is not supported on this browser. Use Chrome or Edge on Windows.";
+                if (hwScanBtn) {
+                    hwScanBtn.disabled = false;
+                    hwScanBtn.innerHTML = '<i class="fas fa-fingerprint me-1"></i> <span>Touch Laptop Fingerprint Sensor to Enroll</span>';
                 }
                 return;
             }
 
-            if (!candidateFpId) {
-                sensorStatusTitle.textContent = "No Print Captured";
-                sensorStatusSub.textContent = "No physical fingerprint signal was received from the sensor.";
-                opticalSensorPad.className = 'optical-sensor-glass';
+            try {
+                // Request registration challenge
+                const chResp = await fetch('/api/webauthn/register-challenge/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ student_name: name, email: email })
+                });
+                const chData = await chResp.json();
+
+                if (!chData.success) {
+                    throw new Error(chData.message || 'Could not initiate registration challenge');
+                }
+
+                const challengeBytes = base64UrlToUint8Array(chData.challenge);
+                const userIdBytes = base64UrlToUint8Array(chData.user.id);
+
+                // Strictly trigger the physical laptop fingerprint reader
+                const cred = await navigator.credentials.create({
+                    publicKey: {
+                        challenge: challengeBytes,
+                        rp: {
+                            name: chData.rp.name,
+                            id: chData.rp.id
+                        },
+                        user: {
+                            id: userIdBytes,
+                            name: chData.user.name,
+                            displayName: chData.user.displayName
+                        },
+                        pubKeyCredParams: [
+                            { alg: -7, type: 'public-key' },  // ES256
+                            { alg: -257, type: 'public-key' } // RS256
+                        ],
+                        authenticatorSelection: {
+                            authenticatorAttachment: 'platform',
+                            userVerification: 'required'
+                        },
+                        timeout: 60000
+                    }
+                });
+
+                if (cred && cred.id) {
+                    candidateFpId = cred.id;
+                } else {
+                    throw new Error("No physical fingerprint detected from sensor.");
+                }
+
+            } catch (authErr) {
+                console.warn('Physical laptop sensor scan cancelled or failed:', authErr);
                 isFpScanning = false;
-                if (scanTriggerBtn) {
-                    scanTriggerBtn.disabled = false;
-                    scanTriggerBtn.innerHTML = `<i class="fas fa-fingerprint me-2"></i> Scan ${currentSelectedFinger} Finger Now`;
+                opticalSensorPad.className = 'optical-sensor-glass duplicate-error';
+                playErrorBuzz();
+
+                currentFingerprintUnique = false;
+                btnFinalSubmit.disabled = true;
+
+                sensorStatusTitle.textContent = "Physical Fingerprint Required!";
+                sensorStatusSub.textContent = authErr.name === 'NotAllowedError' 
+                    ? "Sensor prompt was cancelled or timed out. Place your finger firmly on your laptop's fingerprint sensor."
+                    : (authErr.message || "Failed to read physical fingerprint from laptop sensor.");
+
+                uniquenessStatusBox.className = 'uniqueness-status-box duplicate';
+                statusBoxIcon.className = 'fas fa-circle-xmark status-icon';
+                statusBoxText.innerHTML = `<strong>PHYSICAL FINGERPRINT REQUIRED:</strong> You must place your physical finger on the laptop sensor to eliminate proxy attendance. Simulated or bypassed scans are forbidden.`;
+                uniquenessStatusBox.style.display = 'flex';
+
+                if (hwScanBtn) {
+                    hwScanBtn.disabled = false;
+                    hwScanBtn.innerHTML = '<i class="fas fa-fingerprint me-1"></i> <span>Touch Laptop Fingerprint Sensor to Enroll</span>';
                 }
                 return;
             }
@@ -1468,7 +1461,10 @@
             } catch (e) {}
 
             isFpScanning = false;
-            if (scanTriggerBtn) scanTriggerBtn.disabled = false;
+            if (hwScanBtn) {
+                hwScanBtn.disabled = false;
+                hwScanBtn.innerHTML = '<i class="fas fa-check me-1"></i> <span>Fingerprint Enrolled via Laptop Sensor</span>';
+            }
 
             if (isDuplicate) {
                 // DUPLICATE FINGERPRINT DETECTED! Must be different

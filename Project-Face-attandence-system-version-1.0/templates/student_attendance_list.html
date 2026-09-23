@@ -304,21 +304,29 @@
     <div class="ambient-glow glow-2"></div>
 
     <div class="container">
-        <div class="top-nav">
-            <a href="{% url 'home' %}" class="btn-back-nav">
+        <div class="top-nav" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <a href="{% if is_student_role or request.session.user_role == 'student' %}{% url 'student_dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="btn-back-nav">
                 <i class="fas fa-arrow-left"></i>
-                <span>Return to Dashboard</span>
+                <span>{% if is_student_role or request.session.user_role == 'student' %}Return to Student Portal{% else %}Return to Command Center{% endif %}</span>
             </a>
+            {% if is_student_role or request.session.user_role == 'student' %}
+            <div style="display: flex; gap: 10px;">
+                <a href="{% url 'capture_and_recognize' %}" class="btn-filter" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-camera"></i> Scan Attendance
+                </a>
+            </div>
+            {% endif %}
         </div>
 
         <div class="page-card">
             <div class="header-section">
-                <h2>Attendance Telemetry Records</h2>
-                <p>Detailed verification records, timestamps, and active duration logs</p>
+                <h2>{% if is_student_role or request.session.user_role == 'student' %}My Attendance Telemetry Logs{% else %}System Attendance Telemetry Records{% endif %}</h2>
+                <p>{% if is_student_role or request.session.user_role == 'student' %}Personal check-in records, facial verification timestamps, and daily logs{% else %}Detailed verification records, timestamps, and active duration logs across all students{% endif %}</p>
             </div>
 
             <!-- Search and Date Filter Form -->
             <form method="get" class="filter-container">
+                {% if not is_student_role and request.session.user_role != 'student' %}
                 <div class="input-group">
                     <input type="text" name="search" class="form-control" placeholder="Search student by name..." value="{{ search_query }}">
                     <button class="btn-filter" type="submit">
@@ -326,6 +334,7 @@
                         <span>Search</span>
                     </button>
                 </div>
+                {% endif %}
                 <div class="input-group">
                     <input type="date" name="attendance_date" class="form-control" value="{{ date_filter }}">
                     <button class="btn-filter" type="submit">
@@ -349,7 +358,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% if student_attendance_data %}
+                        {% if has_records %}
                             {% for data in student_attendance_data %}
                                 {% for attendance in data.attendance_records %}
                                 <tr>

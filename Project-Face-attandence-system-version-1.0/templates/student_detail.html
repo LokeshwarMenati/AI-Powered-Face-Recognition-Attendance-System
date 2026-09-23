@@ -396,6 +396,10 @@
             </div>
 
             <div class="button-bar" style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <a href="{% url 'student_dashboard' %}?student_id={{ student.pk }}" class="btn-enroll-detail" style="background: rgba(168, 85, 247, 0.15); border-color: rgba(168, 85, 247, 0.4); color: #c084fc; text-decoration: none;">
+                    <i class="fas fa-user-shield"></i>
+                    <span>Access Student Portal</span>
+                </a>
                 <button type="button" class="btn-enroll-detail" onclick="openStudentDetailFpModal()">
                     <i class="fas fa-fingerprint"></i>
                     <span>Enroll / Update Laptop Fingerprint</span>
@@ -434,29 +438,26 @@
                 </div>
                 <div id="detailModalStatus" style="display: none; padding: 10px 14px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 14px;"></div>
             </div>
-            <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 14px; border-top: 1px solid var(--border-subtle);">
+            <div style="display: flex; justify-content: flex-end; gap: 10px; padding-top: 14px; border-top: 1px solid var(--border-subtle); flex-wrap: wrap;">
                 <button type="button" onclick="closeStudentDetailFpModal()" style="background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-subtle); border-radius: 10px; padding: 10px 18px; color: var(--text-muted); cursor: pointer;">Cancel</button>
-                <button type="button" id="btnConfirmDetailEnroll" onclick="performDetailEnrollFingerprint()" style="background: linear-gradient(135deg, #00f2fe, #4facfe); border: none; border-radius: 10px; padding: 10px 20px; color: #060913; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-                    <i class="fas fa-hand-point-up me-2"></i> Touch Laptop Sensor to Enroll
+                <button type="button" id="btnConfirmDetailEnroll" onclick="performDetailEnrollFingerprint(true)" style="background: linear-gradient(135deg, #00f2fe, #4facfe); border: none; border-radius: 10px; padding: 10px 22px; color: #060913; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-fingerprint me-2"></i> Touch Laptop Sensor to Enroll
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Auto-switch 127.0.0.1 to localhost for WebAuthn platform authenticator compatibility
-        if (window.location.hostname === '127.0.0.1') {
-            window.location.replace(window.location.href.replace('127.0.0.1', 'localhost'));
-        }
-
         let selectedDetailFinger = 'Right Index';
 
         function openStudentDetailFpModal() {
             document.getElementById('detailFpModal').style.display = 'flex';
             document.getElementById('detailModalStatus').style.display = 'none';
             const btn = document.getElementById('btnConfirmDetailEnroll');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-hand-point-up me-2"></i> Touch Laptop Sensor to Enroll';
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-fingerprint me-2"></i> Touch Laptop Sensor to Enroll';
+            }
         }
 
         function closeStudentDetailFpModal() {
@@ -495,26 +496,30 @@
             return cookieValue;
         }
 
-        async function performDetailEnrollFingerprint() {
+        async function performDetailEnrollFingerprint(useHardware = true) {
             const status = document.getElementById('detailModalStatus');
             const btn = document.getElementById('btnConfirmDetailEnroll');
+
+            if (btn) btn.disabled = true;
+
+            let credId = null;
 
             if (!window.PublicKeyCredential) {
                 status.style.display = 'block';
                 status.style.background = 'rgba(244, 63, 94, 0.15)';
                 status.style.border = '1px solid rgba(244, 63, 94, 0.3)';
                 status.style.color = '#fda4af';
-                status.textContent = 'WebAuthn / Laptop fingerprint reader is not supported on this browser.';
+                status.textContent = 'WebAuthn platform biometric reader is not supported on this browser. Please use Chrome or Edge on Windows.';
+                if (btn) btn.disabled = false;
                 return;
             }
 
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Touch Laptop Fingerprint Reader...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Touch Laptop Sensor...';
             status.style.display = 'block';
             status.style.background = 'rgba(0, 242, 254, 0.15)';
             status.style.border = '1px solid rgba(0, 242, 254, 0.3)';
             status.style.color = 'var(--cyan-glow)';
-            status.textContent = 'Windows Hello prompt active: Please place your finger on the sensor...';
+            status.textContent = 'Windows Hello prompt active: Please place your finger on the laptop sensor...';
 
             try {
                 const chResp = await fetch(`/api/webauthn/register-challenge/?student_id={{ student.id }}`);
@@ -551,13 +556,30 @@
                     }
                 });
 
-                if (!cred || !cred.id) {
-                    throw new Error('No biometric credential captured from laptop sensor.');
+                if (cred && cred.id) {
+                    credId = cred.id;
+                } else {
+                    throw new Error("No physical fingerprint detected.");
                 }
+            } catch (authErr) {
+                console.warn('Hardware sensor scan cancelled or failed:', authErr);
+                status.style.background = 'rgba(244, 63, 94, 0.15)';
+                status.style.border = '1px solid rgba(244, 63, 94, 0.3)';
+                status.style.color = '#fda4af';
+                status.textContent = authErr.name === 'NotAllowedError' 
+                    ? 'Sensor scan was cancelled or timed out. Place your finger firmly on your laptop sensor to enroll.'
+                    : (authErr.message || 'Sensor enrollment failed. Please try again.');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-fingerprint me-2"></i> Touch Laptop Sensor to Enroll';
+                }
+                return;
+            }
 
+            try {
                 const formData = new FormData();
                 formData.append('student_id', '{{ student.id }}');
-                formData.append('credential_id', cred.id);
+                formData.append('credential_id', credId);
                 formData.append('finger_type', selectedDetailFinger);
 
                 const csrftoken = getCookie('csrftoken');
@@ -573,7 +595,7 @@
                     status.style.border = '1px solid rgba(16, 185, 129, 0.3)';
                     status.style.color = '#6ee7b7';
                     status.textContent = saveData.message;
-                    btn.innerHTML = '<i class="fas fa-check me-2"></i> Fingerprint Registered!';
+                    if (btn) btn.innerHTML = '<i class="fas fa-check me-2"></i> Enrolled Successfully!';
 
                     document.getElementById('detailFpText').innerHTML = `<strong style="color: var(--cyan-glow);">${selectedDetailFinger}</strong> <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; color: #94a3b8; margin-left: 8px;">[Hardware Authenticated]</span>`;
                     const badge = document.getElementById('detailFpBadge');
@@ -588,16 +610,14 @@
                 }
             } catch (err) {
                 console.error(err);
-                let msg = err.message || 'Sensor enrollment was cancelled.';
-                if (err.name === 'NotAllowedError') {
-                    msg = 'Sensor touch was cancelled or timed out. No finger placed.';
-                }
                 status.style.background = 'rgba(244, 63, 94, 0.15)';
                 status.style.border = '1px solid rgba(244, 63, 94, 0.3)';
                 status.style.color = '#fda4af';
-                status.textContent = msg;
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-hand-point-up me-2"></i> Try Touching Sensor Again';
+                status.textContent = err.message || 'Enrollment failed.';
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-fingerprint me-2"></i> Touch Laptop Sensor to Enroll';
+                }
             }
         }
     </script>

@@ -1433,8 +1433,19 @@
             <!-- Biometric Fingerprint Scanner Section -->
             <div id="fingerprintContainer" style="display: none;">
                 <div class="fp-login-station">
+                    <!-- Zero-Proxy Hardware Biometric Notice -->
+                    <div style="margin-bottom: 20px; text-align: center; background: rgba(0, 242, 254, 0.06); border: 1px dashed rgba(0, 242, 254, 0.3); border-radius: 14px; padding: 14px 16px;">
+                        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--cyan-glow); font-size: 0.9rem; font-weight: 700; margin-bottom: 4px;">
+                            <i class="fas fa-shield-halved"></i>
+                            <span>Zero-Proxy Biometric Fingerprint Sensor</span>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #94a3b8; margin: 0; line-height: 1.45;">
+                            Place your finger on your laptop's physical fingerprint reader. The system detects your identity automatically from your biometric print.
+                        </p>
+                    </div>
+
                     <!-- Sensor Pad Area -->
-                    <div class="fp-login-sensor-wrapper" id="fpLoginSensorWrapper" onclick="triggerFingerprintLogin()" title="Click or touch laptop fingerprint sensor">
+                    <div class="fp-login-sensor-wrapper" id="fpLoginSensorWrapper" onclick="triggerFingerprintLogin()" title="Click to activate laptop fingerprint sensor">
                         <div class="fp-sonar-pulse wave-1"></div>
                         <div class="fp-sonar-pulse wave-2"></div>
                         <div class="fp-sonar-pulse wave-3"></div>
@@ -1450,27 +1461,27 @@
                     <div class="bio-status-wrapper" style="margin-top: 14px;">
                         <div class="bio-status-pill info" id="fpLoginStatusPill">
                             <i class="fas fa-fingerprint" id="fpLoginStatusIcon"></i>
-                            <span id="fpLoginStatusMsg">Touch your laptop fingerprint reader to sign in...</span>
+                            <span id="fpLoginStatusMsg">Touch laptop sensor or tap button below to sign in...</span>
                         </div>
                     </div>
 
-                    <!-- Main Action Button -->
-                    <div style="margin-top: 12px;">
+                    <!-- Action Button -->
+                    <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 8px;">
                         <button type="button" class="submit-btn fp-scan-btn" id="btnFpLoginAction" onclick="triggerFingerprintLogin()">
                             <span class="btn-spinner" id="fpLoginSpinner" style="display: none;"></span>
-                            <span id="fpLoginBtnText"><i class="fas fa-fingerprint me-2"></i> Touch Laptop Sensor to Sign In</span>
+                            <span id="fpLoginBtnText"><i class="fas fa-fingerprint me-2"></i> Touch Laptop Fingerprint Sensor to Sign In</span>
                         </button>
                     </div>
 
                     <!-- Telemetry Hardware Status -->
                     <div class="fp-telemetry-row">
                         <div class="fp-tele-item">
-                            <span class="fp-tele-label">Sensor:</span>
-                            <span class="fp-tele-val" id="fpHardwareStatus">Windows Hello / Touch ID</span>
+                            <span class="fp-tele-label">Mode:</span>
+                            <span class="fp-tele-val" id="fpHardwareStatus">Dual Biometrics Active</span>
                         </div>
                         <div class="fp-tele-item">
-                            <span class="fp-tele-label">Protocol:</span>
-                            <span class="fp-tele-val">WebAuthn FIDO2</span>
+                            <span class="fp-tele-label">Security:</span>
+                            <span class="fp-tele-val">SHA-256 Minutiae & WebAuthn</span>
                         </div>
                     </div>
 
@@ -1502,6 +1513,11 @@
 
     <!-- Script for Dynamic Particles, Password Toggle, and Interactive Animations -->
     <script>
+        // Auto-switch 127.0.0.1 to localhost for WebAuthn platform authenticator compatibility
+        if (window.location.hostname === '127.0.0.1') {
+            window.location.replace(window.location.href.replace('127.0.0.1', 'localhost'));
+        }
+
         let bioStream = null;
         let bioAutoScanInterval = null;
         let isScanning = false;
@@ -1521,6 +1537,24 @@
             return cookieValue;
         }
 
+        function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.25) {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const audioCtx = new AudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
         function playSuccessChime() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -1538,6 +1572,13 @@
                 osc.start();
                 osc.stop(ctx.currentTime + 0.5);
             } catch(e) {}
+        }
+
+        function playErrorBuzz() {
+            try {
+                playTone(180, 'sawtooth', 0.25, 0.3);
+                setTimeout(() => playTone(140, 'sawtooth', 0.3, 0.3), 120);
+            } catch (e) {}
         }
 
         function setBioStatus(message, state = 'info') {
@@ -1673,7 +1714,7 @@
                     
                     stopBiometricCamera();
                     setTimeout(() => {
-                        window.location.href = data.redirect_url || '/';
+                        window.location.href = data.redirect_url || '/student/dashboard/';
                     }, 700);
                     return;
                 } else {
@@ -1769,107 +1810,102 @@
 
         async function triggerFingerprintLogin() {
             if (isFpLoggingIn) return;
-
-            // Enforce localhost for WebAuthn in local dev
-            if (window.location.hostname === '127.0.0.1') {
-                window.location.href = window.location.href.replace('127.0.0.1', 'localhost');
-                return;
-            }
-
-            if (!window.PublicKeyCredential) {
-                setFpLoginStatus('WebAuthn / Windows Hello is not supported in this browser. Please use Chrome or Edge.', 'error');
-                return;
-            }
-
             isFpLoggingIn = true;
+
             const spinner = document.getElementById('fpLoginSpinner');
             const btnText = document.getElementById('fpLoginBtnText');
             const btn = document.getElementById('btnFpLoginAction');
             const touchPrompt = document.getElementById('fpTouchPrompt');
 
             if (spinner) spinner.style.display = 'inline-block';
-            if (btnText) btnText.innerHTML = 'Waiting for Laptop Sensor...';
             if (btn) btn.disabled = true;
-            if (touchPrompt) touchPrompt.textContent = 'SCANNING...';
-
-            setFpLoginStatus('Sensor active. Please touch your laptop fingerprint reader...', 'scanning');
+            if (touchPrompt) touchPrompt.textContent = 'TOUCH SENSOR';
 
             try {
-                // 1. Fetch challenge and registered credentials from backend
+                playTone(440, 'triangle', 0.1, 0.2);
+                setTimeout(() => playTone(550, 'sine', 0.1, 0.2), 150);
+            } catch (e) {}
+
+            try {
+                if (!window.PublicKeyCredential) {
+                    throw new Error('WebAuthn biometric platform authenticator is not supported on this browser.');
+                }
+
+                if (btnText) btnText.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Place Finger on Laptop Reader...';
+                setFpLoginStatus('Windows Hello active! Place your registered finger on your laptop reader...', 'scanning');
+
+                // 1. Fetch biometric challenge from backend
                 const chalRes = await fetch('/api/webauthn/attendance-challenge/');
                 const chalData = await chalRes.json();
-
                 if (!chalData.success) {
                     throw new Error(chalData.message || 'Failed to initialize biometric challenge.');
                 }
 
-                const challengeBuffer = base64UrlToUint8Array(chalData.challenge);
                 const allowCredentials = (chalData.allowCredentials || []).map(cred => ({
                     id: base64UrlToUint8Array(cred.id),
-                    type: 'public-key',
-                    transports: ['internal']
+                    type: 'public-key'
                 }));
 
+                const challengeBuffer = base64UrlToUint8Array(chalData.challenge);
                 const publicKeyOptions = {
                     challenge: challengeBuffer,
-                    rpId: chalData.rpId || window.location.hostname,
+                    rpId: window.location.hostname,
                     userVerification: 'required',
                     timeout: 60000
                 };
-
                 if (allowCredentials.length > 0) {
                     publicKeyOptions.allowCredentials = allowCredentials;
                 }
 
-                // 2. Invoke Laptop Fingerprint Reader (Windows Hello)
-                const credential = await navigator.credentials.get({
-                    publicKey: publicKeyOptions
-                });
+                // 2. Open native Windows Hello / laptop sensor prompt
+                let credential = null;
+                try {
+                    credential = await navigator.credentials.get({ publicKey: publicKeyOptions });
+                } catch (credErr) {
+                    console.warn('Physical fingerprint prompt canceled/failed:', credErr);
+                    if (credErr.name === 'NotAllowedError') {
+                        throw new Error('Fingerprint scan was canceled or timed out. Place your finger on the laptop sensor to authenticate.');
+                    }
+                    throw credErr;
+                }
 
-                if (!credential) {
-                    throw new Error('No credential received from fingerprint sensor.');
+                if (!credential || !credential.rawId) {
+                    throw new Error('No fingerprint detected on physical sensor. Please touch the sensor.');
                 }
 
                 const credentialIdB64 = bufferToBase64Url(credential.rawId);
-                setFpLoginStatus('Biometric signature captured! Verifying identity...', 'scanning');
+                setFpLoginStatus('Biometric signature captured! Identifying person from database...', 'scanning');
+                if (touchPrompt) touchPrompt.textContent = 'VERIFYING...';
 
-                // 3. Post credential to login verify
+                // 3. Send biometric credential to server for automatic identity detection (zero-proxy)
                 const formData = new FormData();
                 formData.append('credential_id', credentialIdB64);
-
                 const csrftoken = getCookie('csrftoken') || document.querySelector('[name=csrfmiddlewaretoken]')?.value;
                 const verifyRes = await fetch('/api/webauthn/login-verify/', {
                     method: 'POST',
                     body: formData,
                     headers: csrftoken ? { 'X-CSRFToken': csrftoken } : {}
                 });
-
                 const verifyData = await verifyRes.json();
 
                 if (verifyData.success) {
-                    playSuccessChime();
-                    setFpLoginStatus(`✓ Fingerprint verified! Welcome, ${verifyData.name}! Redirecting...`, 'success');
+                    try { playSuccessChime(); } catch (e) {}
+                    setFpLoginStatus(`✓ Verified! Welcome, ${verifyData.name}! Redirecting...`, 'success');
                     if (touchPrompt) touchPrompt.textContent = 'VERIFIED';
-                    setTimeout(() => {
-                        window.location.href = verifyData.redirect_url || '/';
-                    }, 700);
+                    setTimeout(() => { window.location.href = verifyData.redirect_url || '/student/dashboard/'; }, 700);
                     return;
                 } else {
-                    setFpLoginStatus(verifyData.message || 'Fingerprint not recognized. Please try again.', 'error');
-                    if (touchPrompt) touchPrompt.textContent = 'RETRY';
+                    throw new Error(verifyData.message || 'Fingerprint not recognized. Proxy prevented.');
                 }
             } catch (err) {
                 console.error('Fingerprint login error:', err);
-                if (err.name === 'NotAllowedError') {
-                    setFpLoginStatus('Biometric prompt was canceled or timed out. Tap sensor to retry.', 'info');
-                } else {
-                    setFpLoginStatus(err.message || 'Fingerprint authentication failed.', 'error');
-                }
-                if (touchPrompt) touchPrompt.textContent = 'TAP SENSOR';
+                try { playErrorBuzz(); } catch (e) {}
+                setFpLoginStatus(err.message || 'Fingerprint authentication failed.', 'error');
+                if (touchPrompt) touchPrompt.textContent = 'RETRY';
             } finally {
                 isFpLoggingIn = false;
                 if (spinner) spinner.style.display = 'none';
-                if (btnText) btnText.innerHTML = '<i class="fas fa-fingerprint me-2"></i> Touch Laptop Sensor to Sign In';
+                if (btnText) btnText.innerHTML = '<i class="fas fa-fingerprint me-2"></i> Touch Laptop Fingerprint Sensor to Sign In';
                 if (btn) btn.disabled = false;
             }
         }

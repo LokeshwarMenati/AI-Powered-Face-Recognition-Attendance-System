@@ -7,6 +7,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('selfie-success/', views.selfie_success, name='selfie_success'),
     path('capture-and-recognize/', views.capture_and_recognize, name='capture_and_recognize'),
+    path('capture-and-recognize/', views.capture_and_recognize, name='capture-and-recognize'),
     path('api/recognize-face/', views.recognize_face_api, name='recognize_face_api'),
     path('api/detect-face/', views.detect_face_api, name='detect_face_api'),
     path('api/biometric-login/', views.biometric_login_api, name='biometric_login_api'),

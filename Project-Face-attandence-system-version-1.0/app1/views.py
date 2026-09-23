@@ -479,49 +479,31 @@ def biometric_login_api(request):
                 'message': 'Biometric face not recognized. Please retry in good lighting or use credential sign in.'
             })
 
-        # Biometric verified! Determine if admin or student
-        admin_user = User.objects.filter(username__iexact='lokeshwar').first()
-        is_admin_target = (
-            portal_type == 'admin' or
-            'lokeshwar' in matched_name.lower() or
-            (admin_user and matched_name.strip().lower() == admin_user.username.lower())
-        )
-
-        if is_admin_target and admin_user:
-            login(request, admin_user)
-            request.session['user_role'] = 'admin'
-            messages.success(request, f'Biometric authentication verified! Welcome, {admin_user.username}!')
-            return JsonResponse({
-                'success': True,
-                'role': 'admin',
-                'name': admin_user.username,
-                'redirect_url': '/',
-                'message': f'Authenticated as Administrator {admin_user.username}'
-            })
-
-        # If student portal or recognized as student
+        # Biometric face verified! Check if recognized face matches an enrolled Student
         matched_student = Student.objects.filter(name__iexact=matched_name).first()
         if not matched_student:
             matched_student = Student.objects.filter(name__icontains=matched_name).first()
 
         if matched_student:
+            # Student strictly logs into Student account (zero admin access)
             request.session['student_id'] = matched_student.id
             request.session['student_name'] = matched_student.name
             request.session['user_role'] = 'student'
-            messages.success(request, f'Biometric authentication verified! Welcome, {matched_student.name}!')
+            messages.success(request, f'Face biometric authenticated! Welcome, {matched_student.name}!')
             return JsonResponse({
                 'success': True,
                 'role': 'student',
                 'name': matched_student.name,
-                'redirect_url': '/',
+                'redirect_url': '/student/dashboard/',
                 'message': f'Authenticated as Student {matched_student.name}'
             })
 
-        # Fallback to admin if admin exists and name is close
-        if admin_user:
+        # Administrator access only if user is explicitly on Admin portal tab and matches admin username
+        admin_user = User.objects.filter(username__iexact='lokeshwar').first()
+        if portal_type == 'admin' and admin_user and matched_name.strip().lower() == admin_user.username.lower():
             login(request, admin_user)
             request.session['user_role'] = 'admin'
-            messages.success(request, f'Biometric authentication verified! Welcome, {admin_user.username}!')
+            messages.success(request, f'Administrator authenticated! Welcome, {admin_user.username}!')
             return JsonResponse({
                 'success': True,
                 'role': 'admin',
@@ -533,7 +515,7 @@ def biometric_login_api(request):
         return JsonResponse({
             'success': False,
             'face_detected': True,
-            'message': f'Face recognized as {matched_name}, but account record was not found.'
+            'message': f'Face recognized as {matched_name}, but no matching student account was found in the database.'
         })
 
     except Exception as e:
@@ -657,10 +639,56 @@ def fingerprint_attendance_api(request):
         return JsonResponse({'success': False, 'message': f'Fingerprint attendance error: {str(e)}'}, status=500)
 
 
-# Backward-compatible API view for fingerprint login
+# API view for fingerprint biometric login (supports both physical WebAuthn and optical fingerprint ID)
 @csrf_exempt
 def fingerprint_login_api(request):
-    return fingerprint_attendance_api(request)
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
+
+    try:
+        fingerprint_id = request.POST.get('fingerprint_id', '').strip()
+        student_id = request.POST.get('student_id', '').strip()
+        identifier = request.POST.get('identifier', '').strip()
+
+        # Strictly match by unique physical biometric fingerprint_id (Zero-Proxy enforcement)
+        if not fingerprint_id:
+            return JsonResponse({
+                'success': False,
+                'message': 'No biometric fingerprint credential detected. Please touch the laptop fingerprint reader.'
+            }, status=400)
+
+        student = Student.objects.filter(fingerprint_id=fingerprint_id).first()
+
+        if not student:
+            return JsonResponse({
+                'success': False,
+                'message': 'Unrecognized fingerprint! No registered student matches this biometric profile.'
+            }, status=404)
+
+        if not student.authorized:
+            return JsonResponse({
+                'success': False,
+                'message': f'Student {student.name} is not authorized for login. Please contact admin.'
+            }, status=403)
+
+        # Student strictly logs into Student account (zero admin access)
+        request.session['student_id'] = student.id
+        request.session['student_name'] = student.name
+        request.session['user_role'] = 'student'
+        messages.success(request, f'Biometric fingerprint authenticated! Welcome, {student.name}!')
+
+        return JsonResponse({
+            'success': True,
+            'role': 'student',
+            'name': student.name,
+            'redirect_url': '/student/dashboard/',
+            'message': f'Fingerprint authenticated for {student.name}'
+        })
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'success': False, 'message': f'Fingerprint authentication error: {str(e)}'}, status=500)
 
 
 # =====================================================================
@@ -908,6 +936,7 @@ def webauthn_login_verify(request):
         # 1. Match Student profile by physical credential
         student = Student.objects.filter(fingerprint_id=credential_id).first()
         if student:
+            # Student strictly logs into Student account (zero admin access)
             request.session['student_id'] = student.id
             request.session['student_name'] = student.name
             request.session['user_role'] = 'student'
@@ -917,15 +946,14 @@ def webauthn_login_verify(request):
                 'role': 'student',
                 'name': student.name,
                 'redirect_url': '/student/dashboard/',
-                'message': f'Authenticated as {student.name}'
+                'message': f'Authenticated as Student {student.name}'
             })
 
-        # 2. Check Admin account (username: lokeshwar)
+        # 2. Also check if the physical credential was registered directly by admin
         admin_user = User.objects.filter(username__iexact='lokeshwar').first()
         if admin_user:
-            # Check if student name or email matches administrator
-            matched_admin = Student.objects.filter(fingerprint_id=credential_id, name__iexact='lokeshwar').first()
-            if matched_admin or student:
+            matched_admin = Student.objects.filter(fingerprint_id=credential_id, name__icontains='lokeshwar').first()
+            if matched_admin:
                 login(request, admin_user)
                 request.session['user_role'] = 'admin'
                 messages.success(request, f'Administrator authenticated via biometric fingerprint! Welcome, {admin_user.username}!')
@@ -1000,9 +1028,13 @@ def capture_and_recognize(request):
     if cam_configs.exists():
         threshold = cam_configs.first().threshold
     
+    # Get students with registered fingerprints for dual biometric attendance fallback
+    registered_fps = list(Student.objects.filter(authorized=True).exclude(fingerprint_id__isnull=True).exclude(fingerprint_id='').values('id', 'name', 'student_class', 'finger_type', 'fingerprint_id'))
+
     context = {
         'threshold': threshold,
-        'has_cameras': cam_configs.exists()
+        'has_cameras': cam_configs.exists(),
+        'registered_fps': registered_fps
     }
     return render(request, 'capture_and_recognize.html', context)
 
@@ -1011,16 +1043,22 @@ def student_attendance_list(request):
     if not (request.user.is_authenticated or request.session.get('student_id')):
         return redirect(f"/login/?next={request.path}")
 
+    # Determine if logged in as student role vs admin
+    is_student_role = request.session.get('user_role') == 'student' and not (request.user.is_authenticated and (request.user.is_superuser or request.user.is_staff))
+
     # Get the search query and date filter from the request
     search_query = request.GET.get('search', '')
     date_filter = request.GET.get('attendance_date', '')
 
-    # Get all students
-    students = Student.objects.all()
-
-    # Filter students based on the search query
-    if search_query:
-        students = students.filter(name__icontains=search_query)
+    if is_student_role:
+        # Student can only view their own attendance log
+        student_id = request.session.get('student_id')
+        students = Student.objects.filter(id=student_id)
+    else:
+        # Admin can view all students or search
+        students = Student.objects.all()
+        if search_query:
+            students = students.filter(name__icontains=search_query)
 
     # Prepare the attendance data
     student_attendance_data = []
@@ -1033,25 +1071,36 @@ def student_attendance_list(request):
             # Assuming date_filter is in the format YYYY-MM-DD
             attendance_records = attendance_records.filter(date=date_filter)
 
-        attendance_records = attendance_records.order_by('date')
+        attendance_records = attendance_records.order_by('-date', '-check_in_time')
         
         student_attendance_data.append({
             'student': student,
             'attendance_records': attendance_records
         })
 
+    # Determine if there are any actual attendance records
+    has_records = any(item['attendance_records'].exists() for item in student_attendance_data)
+
     context = {
         'student_attendance_data': student_attendance_data,
-        'search_query': search_query,  # Pass the search query to the template
-        'date_filter': date_filter       # Pass the date filter to the template
+        'has_records': has_records,
+        'search_query': search_query,
+        'date_filter': date_filter,
+        'is_student_role': is_student_role,
     }
     return render(request, 'student_attendance_list.html', context)
 
 
 def home(request):
-    # If not logged in, redirect to login page first
-    if not (request.user.is_authenticated or request.session.get('student_id')):
-        return redirect('login')
+    # If student is logged in, redirect them to Student Dashboard (students cannot access admin Command Center)
+    if request.session.get('user_role') == 'student' and not (request.user.is_authenticated and (request.user.is_superuser or request.user.is_staff)):
+        messages.info(request, "Welcome to your Student Portal.")
+        return redirect('student_dashboard')
+
+    # If not logged in as admin, redirect to admin login
+    if not (request.user.is_authenticated and (request.user.is_superuser or request.user.is_staff)):
+        messages.warning(request, 'Administrator credentials required to access the Command Center.')
+        return redirect('admin_login')
 
     total_students = Student.objects.count()
     total_attendance = Attendance.objects.count()
@@ -1076,7 +1125,7 @@ def home(request):
         'current_student': current_student,
         'all_students': all_students,
         'today_attendances': today_attendances,
-        'user_role': request.session.get('user_role', 'guest'),
+        'user_role': 'admin',
     }
     return render(request, 'home.html', context)
 
@@ -1128,7 +1177,9 @@ def student_delete(request, pk):
 
 # View function for student login
 def student_login(request):
-    next_url = request.POST.get('next') or request.GET.get('next') or 'home'
+    next_url = request.POST.get('next') or request.GET.get('next') or 'student_dashboard'
+    if next_url in ('home', '/', '/home/'):
+        next_url = 'student_dashboard'
     
     if request.session.get('student_id'):
         return redirect(next_url)
@@ -1139,7 +1190,8 @@ def student_login(request):
 
         if not identifier or not access_key:
             messages.error(request, 'Please provide both your Student ID/Email and phone number.')
-            return render(request, 'login.html', {'active_tab': 'student', 'next': next_url})
+            registered_fps = list(Student.objects.filter(authorized=True).exclude(fingerprint_id__isnull=True).exclude(fingerprint_id='').values('id', 'name', 'student_class', 'finger_type', 'fingerprint_id'))
+            return render(request, 'login.html', {'active_tab': 'student', 'next': next_url, 'registered_fps': registered_fps})
 
         # Match student by Email, ID, or Name
         matched_student = None
@@ -1167,7 +1219,8 @@ def student_login(request):
         else:
             messages.error(request, 'Student record not found or phone key does not match. Please verify your details.')
 
-    return render(request, 'login.html', {'active_tab': 'student', 'next': next_url})
+    registered_fps = list(Student.objects.filter(authorized=True).exclude(fingerprint_id__isnull=True).exclude(fingerprint_id='').values('id', 'name', 'student_class', 'finger_type', 'fingerprint_id'))
+    return render(request, 'login.html', {'active_tab': 'student', 'next': next_url, 'registered_fps': registered_fps})
 
 
 # View function for administrator login - restricted to lokeshwar
@@ -1194,16 +1247,19 @@ def admin_login(request):
         else:
             messages.error(request, 'Invalid administrator credentials. Please check your username and password.')
 
-    return render(request, 'login.html', {'active_tab': 'admin', 'next': next_url})
+    registered_fps = list(Student.objects.filter(authorized=True).exclude(fingerprint_id__isnull=True).exclude(fingerprint_id='').values('id', 'name', 'student_class', 'finger_type', 'fingerprint_id'))
+    return render(request, 'login.html', {'active_tab': 'admin', 'next': next_url, 'registered_fps': registered_fps})
 
 
 # Main unified user login gateway
 def user_login(request):
-    if request.user.is_authenticated or request.session.get('student_id'):
+    if request.user.is_authenticated and (request.user.is_superuser or request.user.is_staff):
         return redirect('home')
+    elif request.session.get('student_id'):
+        return redirect('student_dashboard')
 
     active_tab = request.GET.get('tab', 'student')
-    next_url = request.POST.get('next') or request.GET.get('next') or 'home'
+    next_url = request.POST.get('next') or request.GET.get('next') or 'student_dashboard'
     
     if request.method == 'POST':
         portal_type = request.POST.get('portal_type', 'student')
@@ -1212,20 +1268,36 @@ def user_login(request):
         else:
             return student_login(request)
             
+    registered_fps = list(Student.objects.filter(authorized=True).exclude(fingerprint_id__isnull=True).exclude(fingerprint_id='').values('id', 'name', 'student_class', 'finger_type', 'fingerprint_id'))
+
     return render(request, 'login.html', {
         'active_tab': active_tab, 
-        'next': next_url
+        'next': next_url,
+        'registered_fps': registered_fps
     })
 
 
-# Student Personal Dashboard View
+# Student Personal Dashboard View (Students view their own; Admins can view any student)
 def student_dashboard(request):
-    student_id = request.session.get('student_id')
-    if not student_id:
+    is_admin_user = request.user.is_authenticated and (request.user.is_superuser or request.user.is_staff)
+
+    # Admin can view any student account via ?student_id=<id>
+    requested_student_id = request.GET.get('student_id')
+
+    if is_admin_user and requested_student_id and str(requested_student_id).isdigit():
+        student = get_object_or_404(Student, id=int(requested_student_id))
+    elif request.session.get('student_id'):
+        student = get_object_or_404(Student, id=request.session.get('student_id'))
+    elif is_admin_user:
+        # Default to first student if admin views student dashboard without param
+        student = Student.objects.first()
+        if not student:
+            messages.info(request, "No students enrolled yet. Please register a student first.")
+            return redirect('capture_student')
+    else:
         messages.warning(request, 'Please sign in with your student credentials to view your personal dashboard.')
         return redirect('student_login')
         
-    student = get_object_or_404(Student, id=student_id)
     attendances = Attendance.objects.filter(student=student).order_by('-date', '-check_in_time')
     
     today = timezone.now().date()
@@ -1238,6 +1310,8 @@ def student_dashboard(request):
     # Calculate attendance benchmark
     attendance_rate = min(100, round((total_days_logged / max(1, 22)) * 100))
     
+    all_students = Student.objects.all().order_by('name') if is_admin_user else None
+
     context = {
         'student': student,
         'attendances': attendances,
@@ -1247,7 +1321,9 @@ def student_dashboard(request):
         'completed_sessions': completed_sessions,
         'attendance_rate': attendance_rate,
         'today': today,
-        'user_role': 'student',
+        'user_role': 'admin' if is_admin_user else 'student',
+        'is_admin_viewer': is_admin_user,
+        'all_students': all_students,
     }
     return render(request, 'student_dashboard.html', context)
 

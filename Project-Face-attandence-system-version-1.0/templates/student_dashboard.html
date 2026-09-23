@@ -549,28 +549,65 @@
     <div class="ambient-glow glow-2"></div>
 
     <div class="container">
+        {% if is_admin_viewer %}
+        <!-- Administrator Banner: Allows Admin to Access and View Any Student Account -->
+        <div style="background: linear-gradient(135deg, rgba(121, 40, 202, 0.25), rgba(0, 242, 254, 0.15)); border: 1.5px solid rgba(121, 40, 202, 0.45); border-radius: 18px; padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(121, 40, 202, 0.35); border: 1px solid var(--purple-glow); display: flex; align-items: center; justify-content: center; color: #d8b4fe;">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div>
+                    <div style="font-size: 0.78rem; font-family: 'JetBrains Mono', monospace; color: #c084fc; text-transform: uppercase; letter-spacing: 1px; font-weight: 700;">Administrator Mode Active</div>
+                    <div style="font-size: 0.95rem; font-weight: 700; color: #ffffff;">Viewing Student Account: <span style="color: var(--cyan-glow);">{{ student.name }}</span> (ID #{{ student.id }})</div>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                {% if all_students %}
+                <label for="adminStudentPicker" style="font-size: 0.82rem; color: #cbd5e1; margin-right: 4px;">Switch Student:</label>
+                <select id="adminStudentPicker" onchange="window.location.href='{% url 'student_dashboard' %}?student_id=' + this.value" style="background: rgba(15, 23, 42, 0.85); color: #e2e8f0; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 8px 14px; font-size: 0.85rem; font-family: 'JetBrains Mono', monospace; cursor: pointer; outline: none;">
+                    {% for s in all_students %}
+                    <option value="{{ s.id }}" {% if s.id == student.id %}selected{% endif %}>{{ s.name }} (ID #{{ s.id }})</option>
+                    {% endfor %}
+                </select>
+                {% endif %}
+                <a href="{% url 'home' %}" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(0, 242, 254, 0.15); border: 1px solid rgba(0, 242, 254, 0.4); color: var(--cyan-glow); padding: 8px 16px; border-radius: 10px; text-decoration: none; font-size: 0.85rem; font-weight: 700;">
+                    <i class="fas fa-arrow-left"></i> Command Center
+                </a>
+            </div>
+        </div>
+        {% endif %}
+
         <!-- Top Navigation -->
         <nav class="top-nav">
-            <a href="{% url 'home' %}" class="nav-brand">
+            <a href="{% if is_admin_viewer %}{% url 'home' %}{% else %}{% url 'student_dashboard' %}{% endif %}" class="nav-brand">
                 <div class="brand-icon">
                     <i class="fas fa-fingerprint"></i>
                 </div>
                 <div class="brand-text">
                     <h1>AI Attendance System</h1>
-                    <p>Student Portal</p>
+                    <p>{% if is_admin_viewer %}Administrator Controller{% else %}Student Portal{% endif %}</p>
                 </div>
             </a>
 
-            <div class="nav-actions">
-                <div class="badge-portal">
-                    <i class="fas fa-user-graduate"></i>
-                    <span>{{ student.name }} (ID #{{ student.id }})</span>
-                </div>
-                <a href="{% url 'capture_and_recognize' %}" class="btn-nav btn-scanner">
-                    <i class="fas fa-camera"></i>
-                    <span>Mark Attendance</span>
+            <!-- Student Profile Navigation Capabilities (Dashboard, Scanning, Enrollment, Attendance Logs) -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                <a href="{% url 'student_dashboard' %}{% if is_admin_viewer %}?student_id={{ student.id }}{% endif %}" class="btn-nav" style="background: rgba(0, 242, 254, 0.15); border: 1px solid var(--cyan-glow); color: var(--cyan-glow); text-decoration: none;">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Dashboard</span>
                 </a>
-                <a href="{% url 'logout' %}" class="btn-nav btn-logout">
+                <a href="{% url 'capture_and_recognize' %}" class="btn-nav btn-scanner" style="text-decoration: none;">
+                    <i class="fas fa-camera"></i>
+                    <span>Scanning (Attendance)</span>
+                </a>
+                <a href="{% url 'capture_student' %}" class="btn-nav" style="background: rgba(121, 40, 202, 0.15); border: 1px solid rgba(121, 40, 202, 0.35); color: #d8b4fe; text-decoration: none;">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Enrollment</span>
+                </a>
+                <a href="{% url 'student_attendance_list' %}" class="btn-nav" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #6ee7b7; text-decoration: none;">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Attendance Logs</span>
+                </a>
+                <a href="{% url 'logout' %}" class="btn-nav btn-logout" style="text-decoration: none;">
                     <i class="fas fa-sign-out-alt"></i>
                     <span>Sign Out</span>
                 </a>

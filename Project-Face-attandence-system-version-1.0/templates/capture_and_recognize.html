@@ -908,9 +908,9 @@
     <div class="container">
         <!-- Top Navigation -->
         <div class="top-nav">
-            <a href="{% url 'home' %}" class="btn-back-home">
+            <a href="{% if request.session.user_role == 'student' %}{% url 'student_dashboard' %}{% else %}{% url 'home' %}{% endif %}" class="btn-back-home">
                 <i class="fas fa-arrow-left"></i>
-                <span>Return to Dashboard</span>
+                <span>Return to {% if request.session.user_role == 'student' %}Student Dashboard{% else %}Command Center{% endif %}</span>
             </a>
 
             <div class="system-pill">
@@ -1021,14 +1021,47 @@
                         <i class="fas fa-fingerprint"></i>
                     </div>
                     <div>
-                        <strong style="color: #ffffff; font-size: 0.95rem; display: block; margin-bottom: 2px;">Dual Biometrics: Camera Face + Laptop Fingerprint</strong>
-                        <span style="color: var(--text-muted); font-size: 0.83rem;">Mark attendance using real-time face recognition, or touch your laptop's physical fingerprint reader.</span>
+                        <strong style="color: #ffffff; font-size: 0.95rem; display: block; margin-bottom: 2px;">Dual Biometrics: Camera Face + Fingerprint Attendance</strong>
+                        <span style="color: var(--text-muted); font-size: 0.83rem;">Mark attendance using real-time camera face recognition or instant optical/hardware fingerprint scanning.</span>
                     </div>
                 </div>
-                <button type="button" id="btnCameraFpScan" onclick="triggerCameraPageFingerprintScan()" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #00f2fe, #4facfe); color: #060913; font-weight: 700; font-size: 0.88rem; padding: 12px 20px; border-radius: 12px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);">
-                    <i class="fas fa-fingerprint"></i>
-                    <span id="cameraFpBtnText">Touch Laptop Sensor to Log Attendance</span>
-                </button>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="button" id="btnCameraFpScan" onclick="triggerCameraPageHardwareFingerprintScan()" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #00f2fe, #4facfe); color: #060913; font-weight: 700; font-size: 0.88rem; padding: 12px 20px; border-radius: 12px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);">
+                        <i class="fas fa-fingerprint"></i>
+                        <span id="cameraFpBtnText">Touch Laptop Sensor (Attendance)</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fingerprint Attendance Modal -->
+            <div id="cameraFpModal" style="display: none; position: fixed; inset: 0; background: rgba(6, 9, 19, 0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
+                <div style="background: rgba(13, 19, 36, 0.95); border: 1px solid rgba(0, 242, 254, 0.3); border-radius: 20px; padding: 28px; max-width: 440px; width: 100%; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7); text-align: center; position: relative;">
+                    <button type="button" onclick="closeCameraFpModal()" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer;">&times;</button>
+                    <div style="width: 56px; height: 56px; border-radius: 16px; background: rgba(0, 242, 254, 0.12); color: var(--cyan-glow); font-size: 1.6rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+                        <i class="fas fa-fingerprint"></i>
+                    </div>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 6px;">Hardware Fingerprint Attendance</h3>
+                    <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 16px;">Touch your laptop's fingerprint sensor. The system detects your identity automatically from your unique biometric print (Zero-Proxy).</p>
+                    
+                    <div style="margin-bottom: 16px; background: rgba(0, 242, 254, 0.06); border: 1px dashed rgba(0, 242, 254, 0.3); border-radius: 12px; padding: 10px 14px; text-align: center;">
+                        <span style="color: var(--cyan-glow); font-size: 0.82rem; font-weight: 600;"><i class="fas fa-shield-halved me-1"></i> Biometric Anti-Proxy Lock Active</span>
+                    </div>
+
+                    <!-- Glowing Sensor Pad -->
+                    <div id="modalFpSensorPad" onclick="triggerCameraPageHardwareFingerprintScan()" style="width: 110px; height: 130px; margin: 0 auto 18px; border-radius: 20px; background: rgba(0, 242, 254, 0.05); border: 2px dashed rgba(0, 242, 254, 0.4); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; position: relative;">
+                        <i class="fas fa-fingerprint" id="modalFpIcon" style="font-size: 2.8rem; color: var(--cyan-glow); transition: all 0.3s;"></i>
+                        <span id="modalFpPrompt" style="font-size: 0.72rem; color: #94a3b8; margin-top: 8px; font-weight: 700; letter-spacing: 0.05em;">TOUCH SENSOR</span>
+                    </div>
+
+                    <div id="modalFpStatus" style="font-size: 0.86rem; color: #94a3b8; margin-bottom: 16px; min-height: 22px;">Place finger on laptop reader to verify attendance...</div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" onclick="closeCameraFpModal()" style="flex: 1; padding: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #cbd5e1; cursor: pointer;">Cancel</button>
+                        <button type="button" onclick="triggerCameraPageHardwareFingerprintScan()" id="btnModalFpConfirm" style="flex: 2; padding: 10px; background: linear-gradient(135deg, #00f2fe, #4facfe); border: none; border-radius: 10px; color: #060913; font-weight: 700; cursor: pointer;">
+                            <i class="fas fa-hand-point-up me-1"></i> Touch Laptop Sensor
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Instruction Grid -->
@@ -1479,25 +1512,104 @@
             return outputArray;
         }
 
-        // Real-Time Laptop Fingerprint Attendance Trigger for Camera Page
-        async function triggerCameraPageFingerprintScan() {
-            const btnText = document.getElementById('cameraFpBtnText');
-            const btn = document.getElementById('btnCameraFpScan');
+        function playTone(freq, type = 'sine', duration = 0.15, gainVal = 0.25) {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const audioCtx = new AudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function playSuccessChime() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                osc.frequency.setValueAtTime(880.00, ctx.currentTime + 0.12);
+                gain.gain.setValueAtTime(0.25, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch(e) {}
+        }
+
+        function playErrorBuzz() {
+            try {
+                playTone(180, 'sawtooth', 0.25, 0.3);
+                setTimeout(() => playTone(140, 'sawtooth', 0.3, 0.3), 120);
+            } catch (e) {}
+        }
+
+        // ================= FINGERPRINT ATTENDANCE HANDLERS =================
+        function openCameraFpModal() {
+            const modal = document.getElementById('cameraFpModal');
+            if (modal) {
+                modal.style.display = 'flex';
+                const status = document.getElementById('modalFpStatus');
+                if (status) {
+                    status.textContent = 'Place finger on laptop reader to verify attendance...';
+                    status.style.color = '#94a3b8';
+                }
+                const icon = document.getElementById('modalFpIcon');
+                if (icon) {
+                    icon.className = 'fas fa-fingerprint';
+                    icon.style.color = 'var(--cyan-glow)';
+                }
+                const prompt = document.getElementById('modalFpPrompt');
+                if (prompt) prompt.textContent = 'TOUCH SENSOR';
+            }
+        }
+
+        function closeCameraFpModal() {
+            const modal = document.getElementById('cameraFpModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        // Real-Time Laptop Fingerprint Attendance Trigger for Hardware Sensor (Zero Proxy)
+        async function triggerCameraPageHardwareFingerprintScan() {
+            openCameraFpModal();
+
+            const status = document.getElementById('modalFpStatus');
+            const icon = document.getElementById('modalFpIcon');
+            const prompt = document.getElementById('modalFpPrompt');
+            const btn = document.getElementById('btnModalFpConfirm');
+
+            if (status) {
+                status.textContent = 'Windows Hello active! Place finger on laptop reader...';
+                status.style.color = 'var(--cyan-glow)';
+            }
+            if (icon) icon.className = 'fas fa-spinner fa-spin';
+            if (prompt) prompt.textContent = 'SCANNING...';
             if (btn) btn.disabled = true;
-            if (btnText) btnText.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Touch Laptop Sensor...';
+
+            try { playTone(440, 'triangle', 0.1, 0.2); } catch (e) {}
 
             try {
+                if (!window.PublicKeyCredential) {
+                    throw new Error('WebAuthn platform biometric authenticator is not supported on this browser or laptop.');
+                }
+
                 const chResp = await fetch('/api/webauthn/attendance-challenge/');
                 const chData = await chResp.json();
 
-                if (!chData.success || chData.registered_count === 0 || chData.webauthn_count === 0) {
-                    showStatus('No laptop fingerprints registered yet. Please enroll your fingerprint on the Dashboard first.', 'error');
-                    return;
-                }
-
-                if (!window.PublicKeyCredential) {
-                    showStatus('WebAuthn / Biometric platform authenticator is not supported on this browser.', 'error');
-                    return;
+                if (!chData.success || chData.registered_count === 0) {
+                    throw new Error('No fingerprints registered yet. Please enroll a student first.');
                 }
 
                 const challengeBytes = base64UrlToUint8Array(chData.challenge);
@@ -1506,27 +1618,32 @@
                     type: 'public-key'
                 }));
 
+                const publicKeyOptions = {
+                    challenge: challengeBytes,
+                    rpId: window.location.hostname,
+                    userVerification: 'required',
+                    timeout: 60000
+                };
+                if (allowedCreds.length > 0) {
+                    publicKeyOptions.allowCredentials = allowedCreds;
+                }
+
                 let assertion = null;
                 try {
-                    assertion = await navigator.credentials.get({
-                        publicKey: {
-                            challenge: challengeBytes,
-                            rpId: chData.rpId,
-                            allowCredentials: allowedCreds,
-                            userVerification: 'required',
-                            timeout: 60000
-                        }
-                    });
+                    assertion = await navigator.credentials.get({ publicKey: publicKeyOptions });
                 } catch (authErr) {
-                    console.warn('Laptop biometric touch prompt was cancelled:', authErr);
-                    showStatus('Sensor prompt cancelled. No finger placed on sensor.', 'info');
-                    return;
+                    console.warn('Laptop biometric touch prompt was cancelled or failed:', authErr);
+                    if (authErr.name === 'NotAllowedError') {
+                        throw new Error('Sensor prompt cancelled or timed out. Place your finger firmly on the sensor.');
+                    }
+                    throw authErr;
                 }
 
                 if (!assertion || !assertion.id) {
-                    showStatus('No fingerprint signal received from laptop sensor.', 'error');
-                    return;
+                    throw new Error('No fingerprint detected on physical sensor. Please touch the sensor.');
                 }
+
+                if (status) status.textContent = 'Biometric captured! Detecting student identity...';
 
                 const formData = new FormData();
                 formData.append('credential_id', assertion.id);
@@ -1540,6 +1657,16 @@
                 const data = await response.json();
 
                 if (data && data.success) {
+                    try { playSuccessChime(); } catch (e) {}
+                    if (icon) {
+                        icon.className = 'fas fa-check-circle';
+                        icon.style.color = 'var(--emerald-glow)';
+                    }
+                    if (status) {
+                        status.textContent = `✓ ${data.message}`;
+                        status.style.color = 'var(--emerald-glow)';
+                    }
+                    if (prompt) prompt.textContent = 'VERIFIED';
                     showStatus(`Biometric Verified: ${data.student_name} (${data.attendance_type})`, 'success');
                     triggerAutoSubmitFeedback({
                         name: data.student_name,
@@ -1547,15 +1674,28 @@
                         timestamp: data.timestamp,
                         duration: data.duration
                     }, data.message);
+
+                    setTimeout(() => {
+                        closeCameraFpModal();
+                    }, 1400);
                 } else {
-                    showStatus(data.message || 'Fingerprint not recognized.', 'error');
+                    throw new Error(data.message || 'Unrecognized fingerprint. Proxy rejected.');
                 }
             } catch (err) {
                 console.error('Fingerprint scan error:', err);
-                showStatus(err.message || 'Error communicating with laptop sensor.', 'error');
+                try { playErrorBuzz(); } catch (e) {}
+                if (icon) {
+                    icon.className = 'fas fa-circle-exclamation';
+                    icon.style.color = '#ef4444';
+                }
+                if (status) {
+                    status.textContent = err.message || 'Fingerprint attendance failed.';
+                    status.style.color = '#fda4af';
+                }
+                if (prompt) prompt.textContent = 'RETRY';
+                showStatus(err.message || 'Fingerprint attendance failed.', 'error');
             } finally {
                 if (btn) btn.disabled = false;
-                if (btnText) btnText.innerHTML = '<i class="fas fa-fingerprint me-2"></i> Touch Laptop Sensor to Log Attendance';
             }
         }
 
