@@ -1,6 +1,11 @@
 # AI-Powered-Face-Recognition-Attendance-System
 
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20Deployment-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://ai-face-attendance-system-omega.vercel.app/)
+[![Python](https://img.shields.io/badge/Python-3.11%20%7C%20Django%205.0-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://ai-face-attendance-system-omega.vercel.app/)
+
 A high-speed, dual-biometric attendance management platform combining deep learning facial recognition with physical hardware fingerprint verification (WebAuthn / Windows Hello), backed by Django 5.0 and OpenCV neural models.
+
+🌐 **Live Production URL**: [https://ai-face-attendance-system-omega.vercel.app/](https://ai-face-attendance-system-omega.vercel.app/)
 
 ---
 
