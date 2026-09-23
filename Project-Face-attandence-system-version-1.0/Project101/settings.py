@@ -74,12 +74,30 @@ WSGI_APPLICATION = 'Project101.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+IS_VERCEL = 'VERCEL' in os.environ
+
+if IS_VERCEL:
+    import shutil
+    db_file = '/tmp/db.sqlite3'
+    orig_db = BASE_DIR / 'db.sqlite3'
+    if not os.path.exists(db_file) and os.path.exists(orig_db):
+        try:
+            shutil.copy2(orig_db, db_file)
+        except Exception:
+            pass
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': db_file,
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -127,8 +145,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # settings.py
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+if IS_VERCEL:
+    MEDIA_ROOT = '/tmp/media/'
+    os.makedirs(MEDIA_ROOT, exist_ok=True)
+else:
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
+LOGIN_URL = 'login'
 
-
-LOGIN_URL = 'login'  # Example: 'login' if your login URL is '/login/'
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.vercel.app',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]

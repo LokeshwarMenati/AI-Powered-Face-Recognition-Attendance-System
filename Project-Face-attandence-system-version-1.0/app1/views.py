@@ -1,8 +1,6 @@
 import os
 import cv2
 import numpy as np
-import torch
-from facenet_pytorch import InceptionResnetV1, MTCNN
 from django.shortcuts import render, redirect, get_object_or_404
 from django.conf import settings
 from .models import Student, Attendance, CameraConfiguration
