@@ -22,3 +22,13 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Project101.settings')
 
 application = get_wsgi_application()
 app = application
+
+# Automatically ensure database tables exist in serverless environment
+try:
+    from django.db import connection
+    tables = connection.introspection.table_names()
+    if 'app1_student' not in tables:
+        from django.core.management import call_command
+        call_command('migrate', interactive=False)
+except Exception as e:
+    print(f"Auto-migration error: {e}")

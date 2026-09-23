@@ -79,10 +79,13 @@ IS_VERCEL = 'VERCEL' in os.environ
 if IS_VERCEL:
     import shutil
     db_file = '/tmp/db.sqlite3'
+    seed_db = BASE_DIR / 'db_seed.sqlite3'
     orig_db = BASE_DIR / 'db.sqlite3'
-    if not os.path.exists(db_file) and os.path.exists(orig_db):
+    source_db = seed_db if os.path.exists(seed_db) else (orig_db if os.path.exists(orig_db) else None)
+    
+    if (not os.path.exists(db_file) or os.path.getsize(db_file) == 0) and source_db:
         try:
-            shutil.copy2(orig_db, db_file)
+            shutil.copy2(source_db, db_file)
         except Exception:
             pass
     DATABASES = {
