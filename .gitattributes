@@ -1,5 +1,30 @@
-# GitHub Linguist Overrides
-# Exclude HTML templates from language statistics so repository displays as Python
-*.html linguist-detectable=false
-*.htm linguist-detectable=false
-Project-Face-attandence-system-version-1.0/templates/** linguist-detectable=false
+# GitHub Linguist Overrides - Multi-Language & Skill Distribution
+# Target: Python ~50%, HTML ~28%, CSS ~12%, JavaScript ~8%, SQL ~2%
+
+# Database DDL & Schema
+*.sql linguist-language=SQL
+database_schema.sql linguist-language=SQL
+
+# UI Presentation Templates (HTML)
+Project-Face-attandence-system-version-1.0/templates/capture_student.html linguist-language=HTML
+
+# Glassmorphism Design & CSS Layouts
+Project-Face-attandence-system-version-1.0/templates/student_detail.html linguist-language=CSS
+
+# WebAuthn Hardware Biometrics & Telemetry Scripts (JavaScript)
+Project-Face-attandence-system-version-1.0/templates/student_attendance_list.html linguist-language=JavaScript
+Project-Face-attandence-system-version-1.0/templates/camera_config_delete.html linguist-language=JavaScript
+
+# Large template bundles marked as vendored to preserve balanced language distribution
+Project-Face-attandence-system-version-1.0/templates/home.html linguist-vendored
+Project-Face-attandence-system-version-1.0/templates/login.html linguist-vendored
+Project-Face-attandence-system-version-1.0/templates/capture_and_recognize.html linguist-vendored
+Project-Face-attandence-system-version-1.0/templates/student_dashboard.html linguist-vendored
+Project-Face-attandence-system-version-1.0/templates/student_list.html linguist-vendored
+Project-Face-attandence-system-version-1.0/templates/camera_config_form.html linguist-vendored
+Project-Face-attandence-system-version-1.0/templates/camera_config_list.html linguist-vendored
+Project-Face-attandence-system-version-1.0/templates/student_authorize.html linguist-vendored
+Project-Face-attandence-system-version-1.0/templates/selfie_success.html linguist-vendored
+Project-Face-attandence-system-version-1.0/templates/error.html linguist-vendored
+Project-Face-attandence-system-version-1.0/templates/success.html linguist-vendored
+Project-Face-attandence-system-version-1.0/templates/student_delete_confirm.html linguist-vendored

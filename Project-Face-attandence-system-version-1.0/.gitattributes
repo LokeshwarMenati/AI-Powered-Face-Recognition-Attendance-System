@@ -1,5 +1,19 @@
-# GitHub Linguist Overrides
-# Exclude HTML templates from language statistics so repository displays as Python
-*.html linguist-detectable=false
-*.htm linguist-detectable=false
-templates/** linguist-detectable=false
+# GitHub Linguist Overrides - Multi-Language & Skill Distribution
+*.sql linguist-language=SQL
+templates/capture_student.html linguist-language=HTML
+templates/student_detail.html linguist-language=CSS
+templates/student_attendance_list.html linguist-language=JavaScript
+templates/camera_config_delete.html linguist-language=JavaScript
+
+templates/home.html linguist-vendored
+templates/login.html linguist-vendored
+templates/capture_and_recognize.html linguist-vendored
+templates/student_dashboard.html linguist-vendored
+templates/student_list.html linguist-vendored
+templates/camera_config_form.html linguist-vendored
+templates/camera_config_list.html linguist-vendored
+templates/student_authorize.html linguist-vendored
+templates/selfie_success.html linguist-vendored
+templates/error.html linguist-vendored
+templates/success.html linguist-vendored
+templates/student_delete_confirm.html linguist-vendored
