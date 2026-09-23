@@ -1273,7 +1273,7 @@
                                 id="student_identifier" 
                                 name="student_identifier" 
                                 class="input-field" 
-                                placeholder="e.g. lokeshwarmenati@gmail.com or ID" 
+                                placeholder="Enter student email or ID" 
                                 {% if active_tab != 'admin' %}required{% endif %}
                                 autocomplete="username"
                             >
@@ -1317,7 +1317,7 @@
                                 id="username" 
                                 name="username" 
                                 class="input-field" 
-                                placeholder="Enter admin ID (lokeshwar)" 
+                                placeholder="Enter administrator username" 
                                 {% if active_tab == 'admin' %}required{% endif %}
                                 autocomplete="username"
                             >
@@ -1336,7 +1336,7 @@
                                 id="password" 
                                 name="password" 
                                 class="input-field" 
-                                placeholder="Enter administrator password (12345)" 
+                                placeholder="Enter administrator password" 
                                 {% if active_tab == 'admin' %}required{% endif %}
                                 autocomplete="current-password"
                             >
@@ -2011,7 +2011,7 @@
                 if (portalSubtitle) portalSubtitle.textContent = 'Enter administrative credentials to proceed';
                 if (badgeLabel) badgeLabel.textContent = 'Biometric Security Core';
                 if (submitBtnLabel) submitBtnLabel.textContent = 'Authenticate Administrator';
-                if (hintText) hintText.textContent = 'Administrator access: ID: lokeshwar (Access restricted to authorized admin account).';
+                if (hintText) hintText.textContent = 'Administrator access: Restricted to authorized administrative personnel.';
                 if (faceCoreIcon) faceCoreIcon.innerHTML = '<i class="fas fa-user-shield"></i>';
             } else {
                 stopBiometricCamera();
