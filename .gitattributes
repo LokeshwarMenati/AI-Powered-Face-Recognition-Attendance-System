@@ -1,0 +1,5 @@
+# GitHub Linguist Overrides
+# Exclude HTML templates from language statistics so repository displays as Python
+*.html linguist-detectable=false
+*.htm linguist-detectable=false
+Project-Face-attandence-system-version-1.0/templates/** linguist-detectable=false

@@ -1,0 +1,5 @@
+# GitHub Linguist Overrides
+# Exclude HTML templates from language statistics so repository displays as Python
+*.html linguist-detectable=false
+*.htm linguist-detectable=false
+templates/** linguist-detectable=false
